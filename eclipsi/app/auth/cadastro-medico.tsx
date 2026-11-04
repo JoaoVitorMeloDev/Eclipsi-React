@@ -1,4 +1,6 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import { API_URL } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -10,7 +12,8 @@ import {
     View,
 } from "react-native";
 
-export default function CadastroMedicoScreen({ navigation }) {
+export default function CadastroMedicoScreen() {
+  const router = useRouter();
   // Estados para cada campo do formulário
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,6 +27,10 @@ export default function CadastroMedicoScreen({ navigation }) {
 
   // Lógica de envio do formulário adaptada do api.js
   const handleSubmit = async () => {
+    if (!name.trim() || !email.trim() || !councilNumber.trim() || !password) {
+      Alert.alert("Atenção", "Preencha nome, e-mail, registro e senha.");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Erro", "As senhas não coincidem!");
       return;
@@ -42,7 +49,7 @@ export default function CadastroMedicoScreen({ navigation }) {
 
     try {
       const response = await fetch(
-        "https://seu-backend.com/api/register/doctor",
+        `${API_URL}/api/register/doctor`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -54,10 +61,7 @@ export default function CadastroMedicoScreen({ navigation }) {
       Alert.alert("Aviso", data.message || "Cadastro realizado com sucesso!");
 
       if (response.ok) {
-        // Exemplo de navegação para a tela de login (se estiver usando React Navigation)
-        if (navigation && navigation.navigate) {
-          navigation.navigate("Login");
-        }
+        router.replace("/auth/login");
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -79,7 +83,7 @@ export default function CadastroMedicoScreen({ navigation }) {
           {/* Cabeçalho / Logo */}
           <View style={styles.logoTitle}>
             <Image
-              source={require("../assets/images/logo.png")} // Ajuste o caminho da imagem conforme seu projeto
+              source={require("../../assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -219,11 +223,7 @@ export default function CadastroMedicoScreen({ navigation }) {
 
                 <TouchableOpacity
                   style={styles.backBtn}
-                  onPress={() => {
-                    if (navigation && navigation.goBack) {
-                      navigation.goBack();
-                    }
-                  }}
+                  onPress={() => router.back()}
                 >
                   <Text style={styles.backBtnText}>Voltar</Text>
                 </TouchableOpacity>
@@ -231,11 +231,7 @@ export default function CadastroMedicoScreen({ navigation }) {
                 <View style={styles.loginLinkContainer}>
                   <Text style={styles.registerP}>Já possui conta? </Text>
                   <TouchableOpacity
-                    onPress={() => {
-                      if (navigation && navigation.navigate) {
-                        navigation.navigate("Login");
-                      }
-                    }}
+                    onPress={() => router.replace("/auth/login")}
                   >
                     <Text style={styles.registerLink}>Clique aqui!</Text>
                   </TouchableOpacity>
@@ -294,7 +290,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    textAlign: "center",
   },
   logo: {
     width: 200,

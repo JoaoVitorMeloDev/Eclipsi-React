@@ -8,24 +8,27 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  SafeAreaView,
   StatusBar,
+  Alert,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
-export default function App() {
+const avatar = require('../../assets/images/avatar.png');
+
+export default function UserScreen() {
   // Estados para navegação entre abas ('home', 'consultas', 'perfil', 'configuracoes')
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'consultas' | 'perfil' | 'configuracoes'>('home');
 
   // Estados dos Modais
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
   const [doctorModalVisible, setDoctorModalVisible] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
 
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [ratingDoctorName, setRatingDoctorName] = useState('');
@@ -48,7 +51,7 @@ export default function App() {
       specialty: 'Psicóloga',
       date: '10/10/2026 às 14:00',
       price: 'R$ 200,00',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       status: 'Agendada',
     },
   ];
@@ -60,7 +63,7 @@ export default function App() {
       specialty: 'Psicóloga',
       date: '28/09/2026',
       price: 'R$ 180,00',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       feedback: 'Paciente apresentou excelente evolução nas sessões de TCC. Recomenda-se manter a rotina diária de diário de pensamentos e exercícios de respiração diafragmática.',
     },
     {
@@ -69,7 +72,7 @@ export default function App() {
       specialty: 'Psiquiatra',
       date: '15/09/2026',
       price: 'R$ 350,00',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       feedback: 'Manutenção da medicação atual por mais 30 dias. Encaminhamento enviado para acompanhamento conjunto com neuropsicólogo.',
     },
   ];
@@ -81,7 +84,7 @@ export default function App() {
       profession: 'Psicóloga (CRP 06/123456)',
       rating: '4.9 (48 avaliações)',
       price: 'R$ 200,00 / hora',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       bio: 'Trabalho com a Terapia Cognitivo-Comportamental focada em ansiedade e burnout.',
     },
     {
@@ -90,14 +93,14 @@ export default function App() {
       profession: 'Psiquiatra (CRM 123456/SP - RQE 789)',
       rating: '4.8 (32 avaliações)',
       price: 'R$ 400,00 / hora',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       bio: 'Atendimento psiquiátrico humanizado e focado em diagnóstico preciso.',
     },
   ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#322c8e" />
+      <StatusBar barStyle="light-content" />
 
       {/* Header Superior Fixo */}
       <View style={styles.header}>
@@ -115,7 +118,7 @@ export default function App() {
             placeholder="Pesquisar..."
             placeholderTextColor="#fe9e8e"
           />
-          <Image source={{ uri: 'https://via.placeholder.com/40' }} style={styles.profileImg} />
+          <Image source={avatar} style={styles.profileImg} />
         </View>
       </View>
 
@@ -140,7 +143,7 @@ export default function App() {
                     setDetailsModalVisible(true);
                   }}
                 >
-                  <Image source={{ uri: item.img }} style={styles.cardImg} />
+                  <Image source={item.img} style={styles.cardImg} />
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardDoctorName}>{item.doctor}</Text>
                     <Text style={styles.specialty}>{item.specialty}</Text>
@@ -173,7 +176,7 @@ export default function App() {
                     setDetailsModalVisible(true);
                   }}
                 >
-                  <Image source={{ uri: item.img }} style={styles.cardImg} />
+                  <Image source={item.img} style={styles.cardImg} />
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardDoctorName}>{item.doctor}</Text>
                     <Text style={styles.specialty}>{item.specialty}</Text>
@@ -215,7 +218,7 @@ export default function App() {
                   setDoctorModalVisible(true);
                 }}
               >
-                <Image source={{ uri: doc.img }} style={styles.cardImg} />
+                <Image source={doc.img} style={styles.cardImg} />
                 <View style={styles.cardInfo}>
                   <Text style={styles.cardDoctorName}>{doc.name}</Text>
                   <Text style={styles.specialty}>{doc.profession}</Text>
@@ -246,7 +249,7 @@ export default function App() {
 
             <View style={styles.settingsGroup}>
               <View style={styles.profileAvatarWrapper}>
-                <Image source={{ uri: 'https://via.placeholder.com/120' }} style={styles.profileAvatarLg} />
+                <Image source={avatar} style={styles.profileAvatarLg} />
                 <TouchableOpacity style={styles.avatarUploadBtn}>
                   <Text style={styles.avatarUploadBtnText}>Alterar Foto</Text>
                 </TouchableOpacity>
@@ -272,7 +275,7 @@ export default function App() {
                 />
               </View>
 
-              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => alert('Perfil salvo com sucesso!')}>
+              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Perfil salvo com sucesso!')}>
                 <Text style={styles.saveSettingsBtnText}>Salvar Perfil</Text>
               </TouchableOpacity>
             </View>
@@ -300,7 +303,7 @@ export default function App() {
                 <TextInput style={styles.input} value={userPhone} onChangeText={setUserPhone} />
               </View>
 
-              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => alert('Configurações salvas!')}>
+              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Configurações salvas!')}>
                 <Text style={styles.saveSettingsBtnText}>Salvar Configurações</Text>
               </TouchableOpacity>
             </View>
@@ -387,7 +390,7 @@ export default function App() {
             <TouchableOpacity
               style={styles.saveSettingsBtn}
               onPress={() => {
-                alert('Avaliação enviada com sucesso!');
+                Alert.alert('Avaliação enviada com sucesso!');
                 setRatingModalVisible(false);
               }}
             >

@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import {
     Dimensions,
     Image,
@@ -9,17 +10,10 @@ import {
 
 const { width } = Dimensions.get("window");
 
-export default function CadastroScreen({ navigation }) {
-  // Equivalente às funções makeLogin e makeRegister do script.js
-  const handleLogin = () => {
-    // Exemplo com React Navigation: navigation.navigate('Login');
-    console.log("Navegar para a tela de login");
-  };
-
-  const handleRegister = () => {
-    // Exemplo com React Navigation: navigation.navigate('Cadastro');
-    console.log("Navegar para a tela de cadastro");
-  };
+export default function WelcomeScreen() {
+  const router = useRouter();
+  const handleLogin = () => router.push("/auth/login");
+  const handleRegister = () => router.push("/auth/cadastro");
 
   return (
     <View style={styles.screenContainer}>
@@ -33,7 +27,7 @@ export default function CadastroScreen({ navigation }) {
         {/* Bloco do Logotipo e Título */}
         <View style={styles.logoTitle}>
           <Image
-            source={require("../../assets/images/logo.png")} // Ajuste o caminho conforme sua estrutura
+            source={require("../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -59,7 +53,7 @@ export default function CadastroScreen({ navigation }) {
           </TouchableOpacity>
 
           <Text style={styles.registerP}>
-            Ja fez um cadastro?{" "}
+            Já fez um cadastro?{" "}
             <Text style={styles.registerLink} onPress={handleLogin}>
               Clique aqui!
             </Text>

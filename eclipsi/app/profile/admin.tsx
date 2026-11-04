@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../../lib/api';
 import {
   StyleSheet,
   View,
@@ -8,9 +9,12 @@ import {
   Image,
   ScrollView,
   Modal,
-  SafeAreaView,
   StatusBar,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const avatar = require('../../assets/images/avatar.png');
 
 export default function AdminScreen() {
   // Estados para navegação e controle de abas/sidebar
@@ -43,7 +47,7 @@ export default function AdminScreen() {
   // Funções de API simuladas / adaptadas para React Native (fetch)
   const loadUsers = async (query = '') => {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch(`${API_URL}/api/admin/users`);
       const data = await res.json();
       if (data.success) {
         let filtered = data.users;
@@ -63,7 +67,7 @@ export default function AdminScreen() {
 
   const loadStats = async () => {
     try {
-      const res = await fetch('/api/admin/stats');
+      const res = await fetch(`${API_URL}/api/admin/stats`);
       const data = await res.json();
       if (data.success) {
         setStats(data.stats);
@@ -76,7 +80,7 @@ export default function AdminScreen() {
   const loadAdminProfile = async () => {
     try {
       // Simulação de obtenção do ID via armazenamento local ou contexto
-      const res = await fetch(`/api/admin/profile?id=1`);
+      const res = await fetch(`${API_URL}/api/admin/profile?id=1`);
       const data = await res.json();
       if (data.success) {
         setAdminProfile({
@@ -92,34 +96,34 @@ export default function AdminScreen() {
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(selectedUser),
       });
       const result = await res.json();
-      alert(result.message);
+      Alert.alert(result.message);
       if (result.success) {
         setEditModalVisible(false);
         loadUsers();
       }
     } catch (err) {
-      alert('Erro ao atualizar usuário.');
+      Alert.alert('Erro ao atualizar usuário.');
     }
   };
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`/api/admin/users/${selectedUser.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/admin/users/${selectedUser.id}`, { method: 'DELETE' });
       const result = await res.json();
-      alert(result.message);
+      Alert.alert(result.message);
       if (result.success) {
         setEditModalVisible(false);
         loadUsers();
       }
     } catch (e) {
-      alert('Erro ao excluir o perfil.');
+      Alert.alert('Erro ao excluir o perfil.');
     }
   };
 
@@ -131,15 +135,15 @@ export default function AdminScreen() {
         email: adminProfile.email,
         senha: adminPassword,
       };
-      const res = await fetch('/api/admin/profile', {
+      const res = await fetch(`${API_URL}/api/admin/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       const result = await res.json();
-      alert(result.message);
+      Alert.alert(result.message);
     } catch (err) {
-      alert('Erro ao atualizar perfil de administrador.');
+      Alert.alert('Erro ao atualizar perfil de administrador.');
     }
   };
 
@@ -148,7 +152,7 @@ export default function AdminScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor="#7500a8" barStyle="light-content" />
+      <StatusBar  barStyle="light-content" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -178,7 +182,7 @@ export default function AdminScreen() {
             value={searchQuery}
           />
           <Image
-            source={{ uri: 'https://via.placeholder.com/40' }}
+            source={avatar}
             style={styles.profileImg}
           />
         </View>
@@ -387,7 +391,7 @@ export default function AdminScreen() {
               <View style={styles.settingsGroup}>
                 <View style={styles.profileAvatarWrapper}>
                   <Image
-                    source={{ uri: 'https://via.placeholder.com/120' }}
+                    source={avatar}
                     style={styles.profileAvatarLg}
                   />
                   <TouchableOpacity style={styles.avatarUploadBtn}>

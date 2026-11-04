@@ -1,7 +1,8 @@
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
     Dimensions,
     Image,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -10,27 +11,12 @@ import {
 
 const { width } = Dimensions.get("window");
 
-export default function CadastroScreen({ navigation }) {
-  // Funções de navegação equivalentes às do script.js original
-  const handleMedChange = () => {
-    // Exemplo usando navegação React Navigation: navigation.navigate('CadastroMedico')
-    console.log("Navegar para cadastro de médico");
-  };
-
-  const handlePacChange = () => {
-    // navigation.navigate('CadastroPaciente')
-    console.log("Navegar para cadastro de paciente");
-  };
-
-  const handleGoBack = () => {
-    // navigation.goBack() ou navigation.navigate('Home')
-    console.log("Voltar");
-  };
-
-  const handleLoginRedirect = () => {
-    // navigation.navigate('Login')
-    console.log("Ir para o login");
-  };
+export default function CadastroEscolhaScreen() {
+  const router = useRouter();
+  const handleMedChange = () => router.push("/auth/cadastro-medico");
+  const handlePacChange = () => router.push("/auth/cadastro-user");
+  const handleGoBack = () => router.back();
+  const handleLoginRedirect = () => router.push("/auth/login");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -43,7 +29,7 @@ export default function CadastroScreen({ navigation }) {
       <View style={styles.container}>
         <View style={styles.logoTitleContainer}>
           <Image
-            source={require("../../assets/images/logo.png")} // Ajuste o caminho da imagem conforme seu projeto
+            source={require("../../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />

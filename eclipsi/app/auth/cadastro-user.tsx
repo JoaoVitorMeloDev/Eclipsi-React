@@ -1,4 +1,6 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import { API_URL } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -10,7 +12,8 @@ import {
     View,
 } from "react-native";
 
-export default function CadastroScreen({ navigation }) {
+export default function CadastroUserScreen() {
+  const router = useRouter();
   // Estados para capturar os dados do formulário
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,6 +25,10 @@ export default function CadastroScreen({ navigation }) {
 
   // Lógica de submissão baseada no seu script.js / api.js
   const handleRegister = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      Alert.alert("Atenção", "Preencha nome, e-mail e senha.");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Erro", "As senhas não coincidem!");
       return;
@@ -38,7 +45,7 @@ export default function CadastroScreen({ navigation }) {
 
     try {
       const response = await fetch(
-        "https://seu-backend.com/api/register/user",
+        `${API_URL}/api/register/user`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -51,7 +58,7 @@ export default function CadastroScreen({ navigation }) {
 
       if (response.ok) {
         // Redireciona para a tela de login usando o React Navigation
-        navigation.navigate("Login");
+        router.replace("/auth/login");
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -73,7 +80,7 @@ export default function CadastroScreen({ navigation }) {
           {/* Logo e Título */}
           <View style={styles.logoTitle}>
             <Image
-              source={require("../../assets/images/logo.png")} // Ajuste o caminho do seu ativo local
+              source={require("../../assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -179,7 +186,7 @@ export default function CadastroScreen({ navigation }) {
 
                 <TouchableOpacity
                   style={styles.backBtn}
-                  onPress={() => navigation.goBack()}
+                  onPress={() => router.back()}
                 >
                   <Text style={styles.backBtnText}>Voltar</Text>
                 </TouchableOpacity>
@@ -188,7 +195,7 @@ export default function CadastroScreen({ navigation }) {
                   Já fez um cadastro?{" "}
                   <Text
                     style={styles.registerLink}
-                    onPress={() => navigation.navigate("Login")}
+                    onPress={() => router.replace("/auth/login")}
                   >
                     Clique aqui!
                   </Text>

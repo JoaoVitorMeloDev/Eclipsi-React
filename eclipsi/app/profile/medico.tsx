@@ -8,9 +8,12 @@ import {
   Image,
   ScrollView,
   Modal,
-  SafeAreaView,
   StatusBar,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const avatar = require('../../assets/images/avatar.png');
 
 export default function MedicoScreen() {
   // Estados de navegação e modais
@@ -36,7 +39,7 @@ export default function MedicoScreen() {
       type: 'Sessão TCC / Primeira Consulta',
       date: '30/09/2026 às 14:00',
       price: 'R$ 200,00',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       history: 'Paciente relata episódios recorrentes de ansiedade no trabalho e sintomas de burnout. Histórico sem medicações prévias.',
       preview: 'Paciente relata episódios recorrentes de ansiedade no trabalho e sintomas...',
     },
@@ -46,7 +49,7 @@ export default function MedicoScreen() {
       type: 'Avaliação Neuropsicológica',
       date: '02/10/2026 às 10:00',
       price: 'R$ 300,00',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       history: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória. Encaminhada por neurologista.',
       preview: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória...',
     },
@@ -59,7 +62,7 @@ export default function MedicoScreen() {
       profession: 'Última consulta: 15/09/2026',
       rating: '5 Atendimentos realizados',
       price: 'Plano: Individual',
-      img: 'https://via.placeholder.com/150',
+      img: avatar,
       bio: 'Paciente em acompanhamento semanal. Evolução positiva no manejo de crises de ansiedade. Mantém diário de pensamentos.',
       consultations: [
         { date: '15/09/2026 - 14:00', type: 'Sessão TCC / Acompanhamento', notes: 'Paciente relatou melhora nos episódios de ansiedade após início do diário de pensamentos.' },
@@ -70,7 +73,7 @@ export default function MedicoScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor="#7500a8" barStyle="light-content" />
+      <StatusBar  barStyle="light-content" />
 
       {/* Header Fixo */}
       <View style={styles.header}>
@@ -85,7 +88,7 @@ export default function MedicoScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Image source={{ uri: 'https://via.placeholder.com/40' }} style={styles.profileImg} />
+          <Image source={avatar} style={styles.profileImg} />
         </View>
       </View>
 
@@ -105,7 +108,7 @@ export default function MedicoScreen() {
                   style={styles.appointmentCard}
                   onPress={() => setSelectedAppointment(item)}
                 >
-                  <Image source={{ uri: item.img }} style={styles.cardImg} />
+                  <Image source={item.img} style={styles.cardImg} />
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardTitle}>{item.patient}</Text>
                     <Text style={styles.specialty}>{item.type}</Text>
@@ -185,7 +188,7 @@ export default function MedicoScreen() {
             <View style={styles.settingsForm}>
               <View style={styles.settingsGroup}>
                 <View style={styles.profileAvatarWrapper}>
-                  <Image source={{ uri: 'https://via.placeholder.com/120' }} style={styles.profileAvatarLg} />
+                  <Image source={avatar} style={styles.profileAvatarLg} />
                 </View>
 
                 <View style={styles.formGroup}>
@@ -214,7 +217,7 @@ export default function MedicoScreen() {
                   />
                 </View>
 
-                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => alert('Perfil atualizado com sucesso!')}>
+                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Perfil atualizado com sucesso!')}>
                   <Text style={styles.btnText}>Salvar Perfil Profissional</Text>
                 </TouchableOpacity>
               </View>
@@ -243,7 +246,7 @@ export default function MedicoScreen() {
                   <Text style={styles.label}>Telefone / WhatsApp</Text>
                   <TextInput style={styles.input} defaultValue="(11) 99999-8888" />
                 </View>
-                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => alert('Configurações salvas!')}>
+                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Configurações salvas!')}>
                   <Text style={styles.btnText}>Salvar Configurações</Text>
                 </TouchableOpacity>
               </View>
@@ -292,7 +295,7 @@ export default function MedicoScreen() {
                 <TouchableOpacity 
                   style={[styles.saveSettingsBtn, { marginTop: 12 }]} 
                   onPress={() => {
-                    alert('Anotações salvas com sucesso!');
+                    Alert.alert('Anotações salvas com sucesso!');
                     setSelectedAppointment(null);
                   }}
                 >
@@ -612,6 +615,9 @@ const styles = StyleSheet.create({
     color: '#7500a8',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  settingsHeaderContainer: {
+    marginBottom: 16,
   },
   btnBack: {
     borderWidth: 1,

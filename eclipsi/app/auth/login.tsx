@@ -1,4 +1,6 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import { API_URL } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -9,13 +11,14 @@ import {
     View,
 } from "react-native";
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
+  const router = useRouter();
   // Estados para capturar os inputs do formulário
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   // Função auxiliar para validar o formato do e-mail
-  const validarEmail = (emailStr) => {
+  const validarEmail = (emailStr: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(emailStr);
   };
@@ -41,7 +44,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
       // Substitua pela URL real do seu backend
-      const response = await fetch("https://seu-servidor.com/api/login", {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -50,13 +53,10 @@ export default function LoginScreen({ navigation }) {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // No React Native, você pode salvar os dados do usuário usando AsyncStorage ou Context API
-        // Exemplo: AsyncStorage.setItem('user', JSON.stringify(data.user));
-
-        Alert.alert("Sucesso", "Login realizado com sucesso!");
-
-        // Redirecionamento usando React Navigation (exemplo)
-        // navigation.replace('Dashboard');
+        const tipo = String(data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
+        if (tipo.includes("admin")) router.replace("/profile/admin");
+        else if (tipo.includes("med") || tipo.includes("doctor")) router.replace("/profile/medico");
+        else router.replace("/profile/user");
       } else {
         Alert.alert("Erro", data.message || "E-mail ou senha incorretos.");
       }
@@ -78,7 +78,7 @@ export default function LoginScreen({ navigation }) {
         {/* Cabeçalho com Logo e Título */}
         <View style={styles.logoTitle}>
           <Image
-            source={require("../../assets/images/logo.png")} // Ajuste o caminho conforme sua estrutura de assets
+            source={require("../../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -121,7 +121,7 @@ export default function LoginScreen({ navigation }) {
 
               <TouchableOpacity
                 style={styles.backBtn}
-                onPress={() => navigation.goBack()}
+                onPress={() => router.back()}
               >
                 <Text style={styles.backBtnText}>Voltar</Text>
               </TouchableOpacity>
@@ -130,7 +130,7 @@ export default function LoginScreen({ navigation }) {
                 Ainda não tem conta?{" "}
                 <Text
                   style={styles.registerLink}
-                  onPress={() => navigation.navigate("Register")}
+                  onPress={() => router.push("/auth/cadastro")}
                 >
                   Cadastre-se
                 </Text>
