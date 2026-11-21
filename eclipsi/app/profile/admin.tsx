@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL } from '../../lib/api';
+import { api, ApiError } from '../../lib/api';
 import {
   StyleSheet,
   View,
@@ -37,113 +37,108 @@ export default function AdminScreen() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
 
-  // Carregamento inicial de dados equivalentes ao DOMContentLoaded
-  useEffect(() => {
-    loadUsers();
-    loadStats();
-    loadAdminProfile();
-  }, []);
-
   // Funções de API simuladas / adaptadas para React Native (fetch)
   const loadUsers = async (query = '') => {
     try {
-      const res = await fetch(`${API_URL}/api/admin/users`);
-      const data = await res.json();
+      const data = await api<{ success?: boolean; users?: any[] }>('/api/admin/users');
       if (data.success) {
-        let filtered = data.users;
+        let filtered = data.users ?? [];
         if (query) {
           filtered = filtered.filter(
             (u: any) =>
-              u.nome.toLowerCase().includes(query.toLowerCase()) ||
-              u.email.toLowerCase().includes(query.toLowerCase())
+              String(u.nome ?? '').toLowerCase().includes(query.toLowerCase()) ||
+              String(u.email ?? '').toLowerCase().includes(query.toLowerCase())
           );
         }
         setUsers(filtered);
       }
     } catch (e) {
       console.error('Erro ao carregar usuários:', e);
+      Alert.alert('Erro', e instanceof ApiError ? e.message : 'Nao foi possivel carregar os usuarios.');
     }
   };
 
   const loadStats = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/admin/stats`);
-      const data = await res.json();
+      const data = await api<{ success?: boolean; stats?: any }>('/api/admin/stats');
       if (data.success) {
-        setStats(data.stats);
+        setStats(data.stats ?? {});
       }
     } catch (e) {
       console.error('Erro ao carregar estatísticas:', e);
+      Alert.alert('Erro', e instanceof ApiError ? e.message : 'Nao foi possivel carregar as estatisticas.');
     }
   };
 
   const loadAdminProfile = async () => {
     try {
-      // Simulação de obtenção do ID via armazenamento local ou contexto
-      const res = await fetch(`${API_URL}/api/admin/profile?id=1`);
-      const data = await res.json();
+      const data = await api<{ success?: boolean; admin?: { nome?: string; email?: string } }>('/api/admin/profile');
       if (data.success) {
         setAdminProfile({
-          nome: data.admin.nome || '',
-          email: data.admin.email || '',
+          nome: data.admin?.nome || '',
+          email: data.admin?.email || '',
         });
       }
     } catch (e) {
       console.error('Erro ao carregar perfil do administrador:', e);
+      Alert.alert('Erro', e instanceof ApiError ? e.message : 'Nao foi possivel carregar o perfil.');
     }
   };
+
+  // Carregamento inicial de dados equivalentes ao DOMContentLoaded
+  /* eslint-disable react-hooks/set-state-in-effect -- os dados sao carregados por chamadas externas ao montar a tela */
+  useEffect(() => {
+    loadUsers();
+    loadStats();
+    loadAdminProfile();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`${API_URL}/api/admin/users/${selectedUser.id}`, {
+      const result = await api<{ success?: boolean; message?: string }>(`/api/admin/users/${encodeURIComponent(selectedUser.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(selectedUser),
       });
-      const result = await res.json();
-      Alert.alert(result.message);
+      Alert.alert(result.message || 'Usuario atualizado.');
       if (result.success) {
         setEditModalVisible(false);
         loadUsers();
       }
     } catch (err) {
-      Alert.alert('Erro ao atualizar usuário.');
+      Alert.alert('Erro', err instanceof ApiError ? err.message : 'Erro ao atualizar usuário.');
     }
   };
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     try {
-      const res = await fetch(`${API_URL}/api/admin/users/${selectedUser.id}`, { method: 'DELETE' });
-      const result = await res.json();
-      Alert.alert(result.message);
+      const result = await api<{ success?: boolean; message?: string }>(`/api/admin/users/${encodeURIComponent(selectedUser.id)}`, { method: 'DELETE' });
+      Alert.alert(result.message || 'Usuario excluido.');
       if (result.success) {
         setEditModalVisible(false);
         loadUsers();
       }
     } catch (e) {
-      Alert.alert('Erro ao excluir o perfil.');
+      Alert.alert('Erro', e instanceof ApiError ? e.message : 'Erro ao excluir o perfil.');
     }
   };
 
   const handleUpdateAdminProfile = async () => {
     try {
       const data = {
-        id: 1,
         nome: adminProfile.nome,
         email: adminProfile.email,
         senha: adminPassword,
       };
-      const res = await fetch(`${API_URL}/api/admin/profile`, {
+      const result = await api<{ success?: boolean; message?: string }>('/api/admin/profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      const result = await res.json();
-      Alert.alert(result.message);
+      Alert.alert(result.message || 'Perfil atualizado.');
     } catch (err) {
-      Alert.alert('Erro ao atualizar perfil de administrador.');
+      Alert.alert('Erro', err instanceof ApiError ? err.message : 'Erro ao atualizar perfil de administrador.');
     }
   };
 
