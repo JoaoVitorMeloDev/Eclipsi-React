@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { API_URL } from "../../lib/api";
+import { api, ApiError } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -43,16 +43,15 @@ export default function LoginScreen() {
     };
 
     try {
-      // Substitua pela URL real do seu backend
-      const response = await fetch(`${API_URL}/api/login`, {
+      const data = await api<{
+        success?: boolean;
+        message?: string;
+        user?: { tipo?: string; role?: string };
+      }>("/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         const tipo = String(data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
         if (tipo.includes("admin")) router.replace("/profile/admin");
         else if (tipo.includes("med") || tipo.includes("doctor")) router.replace("/profile/medico");
@@ -62,7 +61,10 @@ export default function LoginScreen() {
       }
     } catch (error) {
       console.error("Erro na requisição de login:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao conectar ao servidor.");
+      Alert.alert(
+        "Erro",
+        error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.",
+      );
     }
   };
 

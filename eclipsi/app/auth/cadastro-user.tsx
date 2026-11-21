@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { API_URL } from "../../lib/api";
+import { api, ApiError } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -44,25 +44,26 @@ export default function CadastroUserScreen() {
     };
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/register/user`,
+      const data = await api<{ success?: boolean; message?: string }>(
+        "/api/register/user",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
       );
 
-      const data = await response.json();
-      Alert.alert("Aviso", data.message || "Cadastro realizado com sucesso!");
-
-      if (response.ok) {
-        // Redireciona para a tela de login usando o React Navigation
+      if (data.success !== false) {
+        Alert.alert("Aviso", data.message || "Cadastro realizado com sucesso!");
         router.replace("/auth/login");
+      } else {
+        Alert.alert("Erro", data.message || "Nao foi possivel realizar o cadastro.");
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao conectar ao servidor.");
+      Alert.alert(
+        "Erro",
+        error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.",
+      );
     }
   };
 
