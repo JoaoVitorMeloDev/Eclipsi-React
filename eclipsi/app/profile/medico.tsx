@@ -1,3 +1,4 @@
+import { AvailabilityPanel } from '../../components/appointments/AvailabilityPanel';
 import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useEffect, useState } from 'react';
@@ -30,7 +31,7 @@ function MedicoScreen() {
   const [concludeLoading, setConcludeLoading] = useState(false);
   const [prescriptionFeedback, setPrescriptionFeedback] = useState('');
   // Estados de navegação e modais
-  const [activeTab, setActiveTab] = useState<'home' | 'pacientes' | 'perfil' | 'configuracoes'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'pacientes' | 'perfil' | 'configuracoes' | 'disponibilidade'>('home');
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   
@@ -39,6 +40,7 @@ function MedicoScreen() {
   const [doctorNotes, setDoctorNotes] = useState('');
   
   // Perfil Profissional (Mock state)
+  const [professionalId, setProfessionalId] = useState<number | string>();
   const [profileName, setProfileName] = useState('');
   const [councilNumber, setCouncilNumber] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
@@ -59,6 +61,7 @@ function MedicoScreen() {
           api<{ success: boolean; stats: any }>('/api/v1/doctor/dashboard'),
           api<{ success: boolean; appointments: any[] }>('/api/v1/doctor/appointments'),
         ]);
+        setProfessionalId(profile.profile?.id);
         setProfileName(profile.profile?.nome || '');
         setCouncilNumber(profile.profile?.registro || '');
         setHourlyRate(String(profile.profile?.valor_hora ?? ''));
@@ -205,6 +208,12 @@ function MedicoScreen() {
         )}
 
         {/* ABA: PERFIL PROFISSIONAL */}
+        {activeTab === 'disponibilidade' && (
+          professionalId != null
+            ? <AvailabilityPanel professionalId={professionalId} />
+            : <Text style={styles.pageTitle}>Perfil profissional indisponível.</Text>
+        )}
+
         {activeTab === 'perfil' && (
           <View>
             <View style={styles.profileHeaderContainer}>
@@ -338,6 +347,7 @@ function MedicoScreen() {
             {[
               { label: 'Resumo', tab: 'home' as const },
               { label: 'Pacientes', tab: 'pacientes' as const },
+              { label: 'Minha Disponibilidade', tab: 'disponibilidade' as const },
               { label: 'Perfil', tab: 'perfil' as const },
               { label: 'Configurações', tab: 'configuracoes' as const },
             ].map((item) => (
@@ -504,6 +514,14 @@ function MedicoScreen() {
           onPress={() => setActiveTab('pacientes')}
         >
           <Text style={styles.bottomNavIcon}>👥</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Minha Disponibilidade"
+          style={[styles.bottomNavItem, activeTab === 'disponibilidade' && styles.bottomNavActive]}
+          onPress={() => setActiveTab('disponibilidade')}
+        >
+          <Text style={styles.bottomNavIcon}>🕒</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.bottomNavItem, activeTab === 'perfil' && styles.bottomNavActive]} 

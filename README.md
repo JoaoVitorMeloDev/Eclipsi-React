@@ -71,14 +71,28 @@ Padronizada centralmente em `eclipsi/lib/palette.ts` e aplicada em todas as tela
 
 | Método | Endpoint | Perfil | Descrição |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/register` | Público | Cadastro de paciente ou profissional |
+| `POST` | `/api/v1/auth/register/user` | Público | Cadastro de paciente |
+| `POST` | `/api/v1/auth/register/doctor` | Público | Cadastro de profissional |
 | `POST` | `/api/v1/auth/login` | Público | Autenticação e emissão de token JWT |
 | `GET` | `/api/me` | Autenticado | Validação de sessão ativa e papel (`role`) |
-| `GET` | `/api/v1/patient/doctors` | Paciente | Listagem de especialistas disponíveis |
-| `POST` | `/api/v1/patient/appointments` | Paciente | Criação de novo agendamento |
-| `GET` | `/api/v1/professional/appointments` | Profissional | Agenda e histórico de atendimentos |
-| `POST` | `/api/v1/professional/prescriptions` | Profissional | Emissão de prescrição/prontuário |
-| `GET` | `/api/v1/admin/overview` | Admin | Métricas globais e gestão de usuários |
+| `POST` | `/api/v1/patient/triage` | Paciente | Salva motivo, abordagem, modalidade, orçamento e urgência |
+| `GET` | `/api/v1/patient/doctors/recommended` | Paciente | Lista especialistas com score e motivos da recomendação |
+| `GET` | `/api/v1/patient/doctors` | Paciente | Fallback do catálogo recomendado |
+| `GET` | `/api/v1/professionals/{id}/availability` | Autenticado | Lista horários futuros livres do profissional |
+| `POST` | `/api/v1/professional/availability` | Profissional | Cria horário com `data_hora` ISO 8601 com fuso |
+| `DELETE` | `/api/v1/professional/availability/{slot_id}` | Profissional | Remove horário livre próprio da grade |
+| `POST` | `/api/v1/patient/appointments` | Paciente | Agenda por `slot_id`. Em caso de `409`, recarrega a grade |
+| `GET` | `/api/v1/appointments` | Autenticado | Consultas vinculadas à conta |
+| `GET` | `/api/v1/doctor/appointments` | Profissional | Agenda e histórico de atendimentos |
+| `PATCH` | `/api/v1/appointments/{id}` | Autenticado | Atualiza a consulta conforme o papel do usuário |
+| `POST` | `/api/v1/payments/pix/create` | Paciente | Cria ou recupera a cobrança por `consulta_id` |
+| `POST` | `/api/v1/payments/pix/{payment_id}/confirm` | Paciente | Confirma exclusivamente no modo demonstração |
+| `POST` | `/api/v1/payments/webhook/mercadopago` | Provedor → API | Confirma o PIX após verificação no Mercado Pago |
+| `GET` | `/api/v1/admin/stats` | Admin | Indicadores administrativos |
+
+A triagem envia `motivo_principal`, `abordagem_preferida`, `modalidade`, `faixa_valor_max` e `urgencia`. O catálogo mantém a ordem decrescente de compatibilidade e exibe os motivos retornados pela API. O catálogo legado `/api/v1/doctors` continua disponível como último fallback durante a transição do backend.
+
+Após a publicação do [PR do backend](https://github.com/JoaoVitorMeloDev/eclipsi-pi-BackEnd/pull/1) e a aplicação da migração no Supabase, a agenda passa a consultar apenas os slots livres enviados pela API. O servidor define o modo PIX. No modo demonstração, o frontend gera o QR Code e oferece confirmação manual. No Mercado Pago, ele exibe o PNG recebido e verifica novamente a cobrança existente quando o usuário solicita. A confirmação vem da API. O painel mantém o badge após a confirmação durante a sessão. Quando a listagem de consultas não inclui o status PIX, é possível recuperar a mesma cobrança ao abrir o pagamento novamente. Credenciais do Mercado Pago ficam no backend.
 
 ---
 
@@ -112,7 +126,6 @@ npx expo export --platform web
 ---
 
 ## Evoluções Planejadas (Roadmap)
-- **Gateway de Pagamento PIX:** Integração com API oficial do Mercado Pago (`POST /v1/payments`) com geração dinâmica de QR Code EMV, código *Copia e Cola* e confirmação automatizada via Webhook.
 - **Notificações Push Web:** Lembretes automáticos de consultas agendadas via Web Push API.
 
 ---

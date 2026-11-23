@@ -1,6 +1,12 @@
+import { Action, Feedback, styles as appointmentStyles } from '../../components/appointments/AppointmentUI';
+import { BookingModal } from '../../components/appointments/BookingModal';
+import { PixModal } from '../../components/appointments/PixModal';
+import { SpecialistCard } from '../../components/appointments/SpecialistCard';
+import { TriageModal } from '../../components/appointments/TriageModal';
+import { errorMessage, listSpecialists, type Specialist } from '../../lib/appointments';
 import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { api, ApiError, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -27,10 +33,13 @@ function UserScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingTime, setBookingTime] = useState('14:00');
-  const [bookingFeedback, setBookingFeedback] = useState('');
+  const [selectedDoctor, setSelectedDoctor] = useState<Specialist | null>(null);
+  const [triageOpen, setTriageOpen] = useState(false);
+  const [paymentAppointment, setPaymentAppointment] = useState<number | string | null>(null);
+  const [paidAppointments, setPaidAppointments] = useState<Set<string>>(() => new Set());
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogFeedback, setCatalogFeedback] = useState('');
+  const [appointmentFeedback, setAppointmentFeedback] = useState('');
   const [profileFeedback, setProfileFeedback] = useState('');
   // Estados para navegação entre abas ('home', 'consultas', 'perfil', 'configuracoes')
   const [activeTab, setActiveTab] = useState<'home' | 'consultas' | 'perfil' | 'configuracoes'>('home');
@@ -50,73 +59,11 @@ function UserScreen() {
   const [profileBio, setProfileBio] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
-  // Dados Mockados para Consultas e Médicos
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [completedAppointments, setCompletedAppointments] = useState<any[]>([]);
-  const [doctorsList, setDoctorsList] = useState<any[]>([]);
+  const [doctorsList, setDoctorsList] = useState<Specialist[]>([]);
 
-  useEffect(() => {
-    const unsubscribeAvatar = subscribeProfileAvatar(setProfilePhoto);
-    const load = async () => {
-      try {
-        const [profile, doctors, appointments] = await Promise.all([
-          api<{ success: boolean; profile: any }>('/api/v1/profile/me'),
-          api<{ success: boolean; doctors: any[] }>('/api/v1/doctors'),
-          api<{ success: boolean; appointments: any[] }>('/api/v1/appointments'),
-        ]);
-        setProfileName(profile.profile?.nome || '');
-        setProfileBio(profile.profile?.descricao || '');
-        setUserEmail(profile.profile?.email || '');
-        setUserPhone(profile.profile?.telefone || '');
-        setProfilePhoto(profile.profile?.foto || null);
-        setProfileAvatar(profile.profile?.foto || null);
-        setDoctorsList(doctors.doctors.map((doctor) => ({
-          id: doctor.id,
-          name: doctor.nome,
-          profession: `${doctor.especialidade || 'Profissional'}${doctor.registro ? ` - ${doctor.registro}` : ''}`,
-          rating: 'Disponível',
-          price: `R$ ${Number(doctor.valor_hora || 0).toFixed(2)} / hora`,
-          img: avatar,
-          foto: doctor.foto,
-          registro: doctor.registro,
-          uf: doctor.uf,
-          valorHora: doctor.valor_hora,
-          bio: doctor.descricao || 'Profissional em saúde mental.',
-        })));
-        setUpcomingAppointments(appointments.appointments
-          .filter((item) => item.status === 'agendada')
-          .map((item) => ({
-            id: item.id,
-            doctor: item.medico_nome,
-            specialty: item.especialidade,
-            date: new Date(item.data_hora).toLocaleString('pt-BR'),
-            price: `R$ ${Number(item.valor).toFixed(2)}`,
-            img: avatar,
-            status: item.status,
-            annotation: item.anotacoes,
-          })));
-        setCompletedAppointments(appointments.appointments
-          .filter((item) => ['concluida', 'realizada'].includes(item.status))
-          .map((item) => ({
-            id: item.id,
-            doctor: item.medico_nome,
-            specialty: item.especialidade,
-            date: new Date(item.data_hora).toLocaleString('pt-BR'),
-            price: `R$ ${Number(item.valor).toFixed(2)}`,
-            img: avatar,
-            feedback: item.anotacoes,
-          })));
-      } catch (error) {
-        if (error instanceof ApiError) Alert.alert('Erro', error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-    return unsubscribeAvatar;
-  }, []);
-
-  const reloadAppointments = async () => {
+  const reloadAppointments = useCallback(async () => {
     const result = await api<{ success: boolean; appointments: any[] }>('/api/v1/appointments');
     setUpcomingAppointments(result.appointments
       .filter((item) => item.status === 'agendada')
@@ -128,6 +75,7 @@ function UserScreen() {
         price: `R$ ${Number(item.valor).toFixed(2)}`,
         img: avatar,
         status: item.status,
+        paid: item.pagamento_status === 'pago' || item.payment_status === 'pago',
         annotation: item.anotacoes,
       })));
     setCompletedAppointments(result.appointments
@@ -141,7 +89,59 @@ function UserScreen() {
         img: avatar,
         feedback: item.anotacoes,
       })));
-  };
+  }, []);
+
+  async function reloadSpecialists() {
+    setCatalogLoading(true);
+    setCatalogFeedback('');
+    try {
+      setDoctorsList(await listSpecialists());
+    } catch (error) {
+      setCatalogFeedback(errorMessage(error, 'Não foi possível carregar os especialistas.'));
+      throw error;
+    } finally {
+      setCatalogLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const unsubscribeAvatar = subscribeProfileAvatar(setProfilePhoto);
+    async function loadProfile() {
+      try {
+        const [{ profile }] = await Promise.all([
+          api<{ profile: { nome?: string; descricao?: string; email?: string; telefone?: string; foto?: string } }>('/api/v1/profile/me'),
+          reloadAppointments(),
+        ]);
+        setProfileName(profile?.nome || '');
+        setProfileBio(profile?.descricao || '');
+        setUserEmail(profile?.email || '');
+        setUserPhone(profile?.telefone || '');
+        setProfileAvatar(profile?.foto || null);
+      } catch (error) {
+        setAppointmentFeedback(errorMessage(error, 'Não foi possível carregar as consultas.'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    void loadProfile();
+    return unsubscribeAvatar;
+  }, [reloadAppointments]);
+
+  useEffect(() => {
+    let active = true;
+    void listSpecialists().then(
+      doctors => { if (active) setDoctorsList(doctors); },
+      error => { if (active) setCatalogFeedback(errorMessage(error, 'Não foi possível carregar os especialistas.')); },
+    ).finally(() => { if (active) setCatalogLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  function reloadAfterAction() {
+    void reloadAppointments().catch(error => {
+      setAppointmentFeedback(errorMessage(error, 'Não foi possível atualizar as consultas.'));
+    });
+  }
+
 
   const chooseProfilePhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -211,6 +211,8 @@ function UserScreen() {
             <Text style={styles.pageTitle}>Página Inicial</Text>
             <Text style={styles.pageSubtitle}>Acompanhe suas consultas agendadas e seu histórico:</Text>
 
+            <Feedback>{appointmentFeedback}</Feedback>
+
             {/* Próximas Consultas */}
             <View style={styles.homeSection}>
               <Text style={styles.sectionTitle}>
@@ -241,6 +243,20 @@ function UserScreen() {
                       <TouchableOpacity style={styles.viewBtn}>
                         <Text style={styles.viewBtnText}>Ver detalhes</Text>
                       </TouchableOpacity>
+                      {item.paid || paidAppointments.has(String(item.id)) ? (
+                        <Text style={appointmentStyles.status}>Pago</Text>
+                      ) : (
+                        <TouchableOpacity
+                          accessibilityRole="button"
+                          style={appointmentStyles.button}
+                          onPress={event => {
+                            event.stopPropagation();
+                            setPaymentAppointment(item.id);
+                          }}
+                        >
+                          <Text style={appointmentStyles.buttonText}>Pagar via PIX</Text>
+                        </TouchableOpacity>
+                      )}
                       <TouchableOpacity
                         style={styles.rateBtn}
                         onPress={async (event) => {
@@ -317,67 +333,21 @@ function UserScreen() {
           <View>
             <Text style={styles.pageTitle}>Buscar Consultas</Text>
             <Text style={styles.pageSubtitle}>Encontre o profissional ideal para o seu acompanhamento:</Text>
+            <View style={appointmentStyles.card}>
+              <Action label="Triagem de Compatibilidade" onPress={() => setTriageOpen(true)} />
+            </View>
+            {catalogLoading && <ActivityIndicator color={palette.indigo} accessibilityLabel="Carregando especialistas" />}
+            <Feedback>{catalogFeedback}</Feedback>
+            {!catalogLoading && !catalogFeedback && !doctorsList.length && (
+              <Text style={appointmentStyles.copy}>Nenhum especialista encontrado.</Text>
+            )}
             {doctorsList
-              .filter((doc) => {
+              .filter(doc => {
                 const query = searchQuery.trim().toLowerCase();
-                if (!query) return true;
-                return `${doc.name} ${doc.profession} ${doc.bio}`.toLowerCase().includes(query);
+                return [doc.nome, doc.especialidade, doc.abordagem, doc.descricao]
+                  .join(' ').toLowerCase().includes(query);
               })
-              .map((doc) => (
-              <TouchableOpacity
-                key={doc.id}
-                style={styles.doctorCard}
-                onPress={() => {
-                  setSelectedDoctor(doc);
-                  setBookingFeedback('');
-                }}
-              >
-                <Image source={doc.img} style={styles.cardImg} />
-                <View style={styles.cardInfo}>
-                  <Text style={styles.cardDoctorName}>{doc.name}</Text>
-                  <Text style={styles.specialty}>{doc.profession}</Text>
-                  <Text style={styles.cardRating}>⭐ {doc.rating}</Text>
-                  <Text style={styles.cardPrice}>💰 {doc.price}</Text>
-                  <Text style={styles.cardPreview} numberOfLines={2}>{doc.bio}</Text>
-                  <TouchableOpacity
-                    style={styles.viewDoctorBtn}
-                    onPress={() => {
-                      setSelectedDoctor(doc);
-                      setBookingFeedback('');
-                    }}
-                  >
-                    <Text style={styles.viewDoctorBtnText}>Ver detalhes</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.viewDoctorBtn, { marginTop: 8 }]}
-                    onPress={async () => {
-                      const date = new Date();
-                      date.setDate(date.getDate() + 1);
-                      date.setHours(14, 0, 0, 0);
-                      try {
-                        await api('/api/v1/appointments', {
-                          method: 'POST',
-                          body: JSON.stringify({
-                            medico_id: Number(doc.id),
-                            data_hora: date.toISOString(),
-                            valor: doc.valorHora,
-                            status: 'agendada',
-                          }),
-                        });
-                        await reloadAppointments();
-                        setActiveTab('consultas');
-                        setBookingFeedback('Consulta agendada com sucesso!');
-                        Alert.alert('Consulta agendada!', date.toLocaleString('pt-BR'));
-                      } catch (error) {
-                        Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel agendar.');
-                      }
-                    }}
-                  >
-                    <Text style={styles.viewDoctorBtnText}>Agendar amanhã às 14h</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
+              .map(doc => <SpecialistCard key={doc.id} doctor={doc} onBook={() => setSelectedDoctor(doc)} />)}
           </View>
         )}
 
@@ -495,67 +465,23 @@ function UserScreen() {
         )}
       </ScrollView>
 
-      <Modal visible={!!selectedDoctor} transparent animationType="fade" onRequestClose={() => setSelectedDoctor(null)}>
-        <View style={styles.drawerBackdrop}>
-          <TouchableOpacity style={styles.drawerOverlay} onPress={() => setSelectedDoctor(null)} />
-          {selectedDoctor ? (
-            <View style={styles.doctorModal}>
-              <Text style={styles.drawerTitle}>{selectedDoctor.name}</Text>
-              <Text style={styles.modalMeta}>{selectedDoctor.profession}</Text>
-              {selectedDoctor.registro ? <Text style={styles.modalMeta}>Registro: {selectedDoctor.registro}</Text> : null}
-              {selectedDoctor.uf ? <Text style={styles.modalMeta}>UF: {selectedDoctor.uf}</Text> : null}
-              <Text style={styles.modalBodyText}>{selectedDoctor.bio}</Text>
-              <Text style={styles.modalPrice}>R$ {Number(selectedDoctor.valorHora || 0).toFixed(2)} / consulta</Text>
-
-              <Text style={styles.label}>Data (AAAA-MM-DD)</Text>
-              <TextInput
-                style={styles.input}
-                value={bookingDate}
-                onChangeText={setBookingDate}
-                placeholder="2026-12-01"
-                placeholderTextColor="#64748B"
-              />
-              <Text style={styles.label}>Horário</Text>
-              <TextInput
-                style={styles.input}
-                value={bookingTime}
-                onChangeText={setBookingTime}
-                placeholder="14:00"
-                placeholderTextColor="#64748B"
-              />
-              {bookingFeedback ? <Text accessibilityRole="alert" style={styles.profileFeedback}>{bookingFeedback}</Text> : null}
-              <TouchableOpacity
-                style={styles.saveSettingsBtn}
-                onPress={async () => {
-                  setBookingFeedback('');
-                  if (!bookingDate || !bookingTime) {
-                    setBookingFeedback('Informe data e horário.');
-                    return;
-                  }
-                  try {
-                    const iso = new Date(`${bookingDate}T${bookingTime}:00`).toISOString();
-                    await api('/api/v1/appointments', {
-                      method: 'POST',
-                      body: JSON.stringify({
-                        medico_id: Number(selectedDoctor.id),
-                        data_hora: iso,
-                        valor: selectedDoctor.valorHora,
-                        status: 'agendada',
-                      }),
-                    });
-                    await reloadAppointments();
-                    setBookingFeedback('Consulta agendada com sucesso!');
-                  } catch (error) {
-                    setBookingFeedback(error instanceof ApiError ? error.message : 'Não foi possível agendar.');
-                  }
-                }}
-              >
-                <Text style={styles.saveSettingsBtnText}>Agendar</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
-        </View>
-      </Modal>
+      {selectedDoctor && (
+        <BookingModal doctor={selectedDoctor} onClose={() => setSelectedDoctor(null)} onBooked={() => {
+          setSelectedDoctor(null);
+          setActiveTab('home');
+          setAppointmentFeedback('Consulta agendada com sucesso!');
+          reloadAfterAction();
+        }} />
+      )}
+      {triageOpen && <TriageModal onClose={() => setTriageOpen(false)} onSaved={reloadSpecialists} />}
+      {paymentAppointment !== null && (
+        <PixModal appointmentId={paymentAppointment} onClose={() => setPaymentAppointment(null)} onPaid={() => {
+          setPaidAppointments(current => new Set(current).add(String(paymentAppointment)));
+          setPaymentAppointment(null);
+          setAppointmentFeedback('Pagamento confirmado.');
+          reloadAfterAction();
+        }} />
+      )}
 
       <Modal visible={drawerOpen} transparent animationType="fade" onRequestClose={() => setDrawerOpen(false)}>
         <View style={styles.drawerBackdrop}>
@@ -813,19 +739,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  doctorCard: {
-    backgroundColor: palette.white,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
   cardImg: {
     width: 65,
     height: 65,
@@ -907,21 +820,6 @@ const styles = StyleSheet.create({
   rateBtnText: {
     color: palette.white,
     fontSize: 12,
-    fontWeight: 'bold',
-  },
-  viewDoctorBtn: {
-    backgroundColor: palette.magenta,
-    borderBottomWidth: 3,
-    borderBottomColor: palette.wine,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  viewDoctorBtnText: {
-    color: palette.white,
-    fontSize: 19,
     fontWeight: 'bold',
   },
   bottomNav: {
@@ -1172,28 +1070,5 @@ const styles = StyleSheet.create({
   drawerLogout: {
     marginTop: 16,
     borderBottomWidth: 0,
-  },
-  doctorModal: {
-    width: '92%',
-    maxWidth: 520,
-    alignSelf: 'center',
-    margin: 'auto',
-    backgroundColor: palette.white,
-    borderRadius: 16,
-    padding: 24,
-  },
-  modalMeta: {
-    color: '#475569',
-    marginBottom: 4,
-  },
-  modalBodyText: {
-    color: palette.indigo,
-    lineHeight: 20,
-    marginVertical: 12,
-  },
-  modalPrice: {
-    color: palette.indigo,
-    fontWeight: '800',
-    marginBottom: 12,
   },
 });
