@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CadastroMedicoScreen() {
   const router = useRouter();
@@ -121,11 +122,10 @@ export default function CadastroMedicoScreen() {
         <View style={styles.container}>
           {/* Cabeçalho / Logo */}
           <View style={styles.logoTitle}>
-            <Image
-              source={require("../../assets/images/logo.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+            <View style={styles.brandRow}>
+              <View style={styles.brandBadge}><Ionicons name="sparkles" size={22} color="#FFFFFF" /></View>
+              <Text style={styles.brandTitle}>EcliPsi</Text>
+            </View>
             <Text style={styles.title}>Cadastro do Profissional</Text>
             <Text style={styles.subtitle}>
               Exclusivo para especialistas em Saúde Mental
@@ -370,6 +370,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+  },
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  brandBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#4F46E5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandTitle: {
+    color: "#0F172A",
+    fontSize: 30,
+    fontWeight: "900",
   },
   logo: {
     width: 200,

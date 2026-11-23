@@ -179,7 +179,9 @@ export default function AdminScreen() {
           >
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
-          <Image source={require('../../assets/images/logo.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="moon" size={20} color="#FFFFFF" />
+          </View>
           <Text style={styles.logo}>EcliPsi</Text>
           <View style={styles.adminBadge}><Text style={styles.adminBadgeText}>ADMINISTRADOR</Text></View>
         </View>
@@ -294,14 +296,24 @@ export default function AdminScreen() {
               </View>
 
               {users.map((user, index) => {
-                const isMed = user.role === 'medico';
+                const role = String(user.role || '').toLowerCase();
+                const badgeStyle = role === 'admin'
+                  ? styles.badgeAdmin
+                  : (role === 'medico' || role === 'profissional')
+                    ? styles.badgeMed
+                    : styles.badgePac;
+                const badgeTextStyle = role === 'admin'
+                  ? styles.badgeTextAdmin
+                  : (role === 'medico' || role === 'profissional')
+                    ? styles.badgeTextMed
+                    : styles.badgeTextPac;
                 return (
                   <View key={index} style={styles.tableRow}>
                     <Text style={[styles.tableCell, { flex: 2 }]}>{user.nome}</Text>
                     <Text style={[styles.tableCell, { flex: 2 }]}>{user.email}</Text>
                     <View style={{ flex: 1.5 }}>
-                      <View style={[styles.badge, isMed ? styles.badgeMed : styles.badgePac]}>
-                        <Text style={[styles.badgeText, isMed ? styles.badgeTextMed : styles.badgeTextPac]}>
+                      <View style={[styles.badge, badgeStyle]}>
+                        <Text style={[styles.badgeText, badgeTextStyle]}>
                           {user.role}
                         </Text>
                       </View>
@@ -765,11 +777,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignSelf: 'flex-start',
   },
-  badgeMed: { backgroundColor: '#f3e5f5' },
-  badgePac: { backgroundColor: '#e3f2fd' },
+  badgeAdmin: { backgroundColor: '#EDE9FE' },
+  badgeMed: { backgroundColor: '#DBEAFE' },
+  badgePac: { backgroundColor: '#F1F5F9' },
   badgeText: { fontSize: 11, fontWeight: 'bold' },
-  badgeTextMed: { color: '#7500a8' },
-  badgeTextPac: { color: '#1976d2' },
+  badgeTextAdmin: { color: '#5B21B6' },
+  badgeTextMed: { color: '#1E40AF' },
+  badgeTextPac: { color: '#334155' },
   btnEditUser: {
     backgroundColor: '#7500a8',
     paddingVertical: 6,

@@ -16,7 +16,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 
 const avatar = require('../../assets/images/avatar.png');
 
@@ -129,6 +129,17 @@ export default function UserScreen() {
         status: item.status,
         annotation: item.anotacoes,
       })));
+    setCompletedAppointments(result.appointments
+      .filter((item) => ['concluida', 'realizada'].includes(item.status))
+      .map((item) => ({
+        id: item.id,
+        doctor: item.medico_nome,
+        specialty: item.especialidade,
+        date: new Date(item.data_hora).toLocaleString('pt-BR'),
+        price: `R$ ${Number(item.valor).toFixed(2)}`,
+        img: avatar,
+        feedback: item.anotacoes,
+      })));
   };
 
   const chooseProfilePhoto = async () => {
@@ -164,8 +175,10 @@ export default function UserScreen() {
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
           </TouchableOpacity>
-          <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
-          <Text style={styles.logo}>EcliPsi</Text>
+          <View style={styles.brandRow}>
+            <View style={styles.brandBadge}><Ionicons name="moon" size={18} color="#FFFFFF" /></View>
+            <Text style={styles.logo}>EcliPsi</Text>
+          </View>
         </View>
         <View style={styles.headerRight}>
           <TextInput
@@ -216,9 +229,32 @@ export default function UserScreen() {
                     <View style={styles.upcomingBadge}>
                       <Text style={styles.upcomingBadgeText}>{item.status}</Text>
                     </View>
-                    <TouchableOpacity style={styles.viewBtn}>
-                      <Text style={styles.viewBtnText}>Ver detalhes</Text>
-                    </TouchableOpacity>
+                    {item.annotation ? (
+                      <Text style={styles.cardPreview}>Prescrição: {item.annotation}</Text>
+                    ) : null}
+                    <View style={styles.cardActions}>
+                      <TouchableOpacity style={styles.viewBtn}>
+                        <Text style={styles.viewBtnText}>Ver detalhes</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.rateBtn}
+                        onPress={async (event) => {
+                          event.stopPropagation();
+                          try {
+                            await api(`/api/v1/appointments/${item.id}`, {
+                              method: 'PATCH',
+                              body: JSON.stringify({ status: 'cancelada' }),
+                            });
+                            await reloadAppointments();
+                            Alert.alert('Consulta cancelada', 'A consulta foi cancelada.');
+                          } catch (error) {
+                            Alert.alert('Erro', error instanceof ApiError ? error.message : 'Não foi possível cancelar.');
+                          }
+                        }}
+                      >
+                        <Text style={styles.rateBtnText}>Cancelar Consulta</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -246,7 +282,9 @@ export default function UserScreen() {
                     <Text style={styles.specialty}>{item.specialty}</Text>
                     <Text style={styles.cardDate}>🗓 {item.date}</Text>
                     <Text style={styles.cardPrice}>💰 {item.price}</Text>
-                    <Text style={styles.cardPreview} numberOfLines={2}>{item.feedback}</Text>
+                    {item.feedback ? (
+                      <Text style={styles.cardPreview} numberOfLines={3}>Prescrição: {item.feedback}</Text>
+                    ) : null}
                     <View style={styles.cardActions}>
                       <TouchableOpacity style={styles.viewBtn}>
                         <Text style={styles.viewBtnText}>Ver detalhes</Text>
@@ -298,6 +336,15 @@ export default function UserScreen() {
                   <Text style={styles.cardPreview} numberOfLines={2}>{doc.bio}</Text>
                   <TouchableOpacity
                     style={styles.viewDoctorBtn}
+                    onPress={() => {
+                      setSelectedDoctor(doc);
+                      setBookingFeedback('');
+                    }}
+                  >
+                    <Text style={styles.viewDoctorBtnText}>Ver detalhes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.viewDoctorBtn, { marginTop: 8 }]}
                     onPress={async () => {
                       const date = new Date();
                       date.setDate(date.getDate() + 1);
@@ -584,10 +631,10 @@ export default function UserScreen() {
                 <View style={styles.modalBody}>
                   <Text style={styles.label}>Data: <Text style={styles.normalText}>{selectedAppointment.date}</Text></Text>
                   <Text style={styles.label}>Valor: <Text style={styles.normalText}>{selectedAppointment.price}</Text></Text>
-                  {selectedAppointment.feedback && (
+                  {(selectedAppointment.feedback || selectedAppointment.annotation) && (
                     <View style={styles.feedbackBox}>
                       <Text style={styles.label}>Anotações do profissional:</Text>
-                      <Text style={styles.feedbackText}>{selectedAppointment.feedback}</Text>
+                      <Text style={styles.feedbackText}>{selectedAppointment.feedback || selectedAppointment.annotation}</Text>
                     </View>
                   )}
                 </View>
@@ -692,6 +739,19 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 36,
     height: 36,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#4F46E5',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logo: {
     fontSize: 20,

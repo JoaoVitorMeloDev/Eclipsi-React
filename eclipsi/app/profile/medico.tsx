@@ -25,6 +25,9 @@ export default function MedicoScreen() {
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState('');
+  const [prescriptionLoading, setPrescriptionLoading] = useState(false);
+  const [concludeLoading, setConcludeLoading] = useState(false);
+  const [prescriptionFeedback, setPrescriptionFeedback] = useState('');
   // Estados de navegação e modais
   const [activeTab, setActiveTab] = useState<'home' | 'pacientes' | 'perfil' | 'configuracoes'>('home');
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
@@ -83,6 +86,21 @@ export default function MedicoScreen() {
     load();
   }, []);
 
+  const reloadAppointments = async () => {
+    const result = await api<{ success: boolean; appointments: any[] }>('/api/v1/doctor/appointments');
+    setAppointments(result.appointments.map((item) => ({
+      id: item.id,
+      patient: item.paciente_nome,
+      type: 'Consulta',
+      date: new Date(item.data_hora).toLocaleString('pt-BR'),
+      price: `R$ ${Number(item.valor).toFixed(2)}`,
+      img: avatar,
+      history: item.anotacoes || 'Sem histórico registrado.',
+      preview: item.anotacoes || 'Consulta agendada.',
+      status: item.status,
+    })));
+  };
+
   const patientsList: any[] = [];
 
   return (
@@ -95,8 +113,12 @@ export default function MedicoScreen() {
           <TouchableOpacity onPress={() => setMenuOpen(true)} accessibilityLabel="Abrir menu">
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
-          <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
-          <Text style={styles.logo}>EcliPsi | Profissional</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="moon" size={18} color="#FFFFFF" />
+            </View>
+            <Text style={styles.logo}>EcliPsi | Profissional</Text>
+          </View>
         </View>
         <View style={styles.headerRight}>
           <TextInput
@@ -362,40 +384,63 @@ export default function MedicoScreen() {
                   value={doctorNotes}
                   onChangeText={setDoctorNotes}
                 />
+                {prescriptionFeedback ? (
+                  <Text accessibilityRole="alert" style={styles.profileFeedback}>{prescriptionFeedback}</Text>
+                ) : null}
 
                 <TouchableOpacity 
                   style={[styles.saveSettingsBtn, { marginTop: 12 }]} 
+                  disabled={prescriptionLoading}
                   onPress={async () => {
+                    setPrescriptionLoading(true);
+                    setPrescriptionFeedback('');
                     try {
                       await api(`/api/v1/appointments/${selectedAppointment.id}`, {
                         method: 'PATCH',
                         body: JSON.stringify({ anotacoes: doctorNotes }),
                       });
-                      Alert.alert('Anotações salvas com sucesso!');
+                      await reloadAppointments();
+                      setPrescriptionFeedback('Prescrição salva com sucesso!');
                       setSelectedAppointment(null);
                     } catch (error) {
-                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                      setPrescriptionFeedback(error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                    } finally {
+                      setPrescriptionLoading(false);
                     }
                   }}
                 >
-                  <Text style={styles.btnText}>Salvar no Prontuário</Text>
+                  {prescriptionLoading ? (
+                    <><ActivityIndicator size="small" color="#FFFFFF" /><Text style={styles.btnText}>Salvando...</Text></>
+                  ) : (
+                    <Text style={styles.btnText}>Salvar no Prontuário</Text>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.saveSettingsBtn, { marginTop: 8 }]}
+                  disabled={concludeLoading}
                   onPress={async () => {
+                    setConcludeLoading(true);
+                    setPrescriptionFeedback('');
                     try {
                       await api(`/api/v1/appointments/${selectedAppointment.id}`, {
                         method: 'PATCH',
                         body: JSON.stringify({ status: 'concluida', anotacoes: doctorNotes }),
                       });
-                      Alert.alert('Consulta concluída!');
+                      await reloadAppointments();
+                      setPrescriptionFeedback('Consulta concluída e prescrição enviada!');
                       setSelectedAppointment(null);
                     } catch (error) {
-                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel concluir.');
+                      setPrescriptionFeedback(error instanceof ApiError ? error.message : 'Nao foi possivel concluir.');
+                    } finally {
+                      setConcludeLoading(false);
                     }
                   }}
                 >
-                  <Text style={styles.btnText}>Concluir Consulta</Text>
+                  {concludeLoading ? (
+                    <><ActivityIndicator size="small" color="#FFFFFF" /><Text style={styles.btnText}>Concluindo...</Text></>
+                  ) : (
+                    <Text style={styles.btnText}>Concluir Consulta</Text>
+                  )}
                 </TouchableOpacity>
               </ScrollView>
             )}
