@@ -171,9 +171,9 @@ export default function AdminScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        <View style={[styles.headerLeft, { flexDirection: "row", alignItems: "center", gap: 10, flexShrink: 1 }]}>
           <TouchableOpacity
-            style={styles.burgerBtn}
+            style={[styles.burgerBtn, { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", padding: 0 }]}
             onPress={() => setSidebarOpen(true)}
             activeOpacity={0.7}
           >
