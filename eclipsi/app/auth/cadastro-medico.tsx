@@ -80,8 +80,11 @@ export default function CadastroMedicoScreen() {
       <View style={styles.backgroundBottom} />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator
+        keyboardShouldPersistTaps="handled"
+        alwaysBounceVertical
       >
         <View style={styles.container}>
           {/* Cabeçalho / Logo */}
@@ -278,8 +281,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
+    paddingTop: 24,
+    paddingBottom: 48,
     zIndex: 2,
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
   },
   container: {
     position: "relative",

@@ -76,8 +76,11 @@ export default function CadastroUserScreen() {
       <View style={styles.backgroundBottom} />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator
+        keyboardShouldPersistTaps="handled"
+        alwaysBounceVertical
       >
         <View style={styles.container}>
           {/* Logo e Título */}
@@ -241,8 +244,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingTop: 24,
+    paddingBottom: 48,
     zIndex: 2,
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
   },
   container: {
     position: "relative",

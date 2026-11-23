@@ -6,6 +6,16 @@ import { StatusBar } from "expo-status-bar";
 export default function RootLayout() {
   useEffect(() => {
     if (Platform.OS === "web") {
+      document.documentElement.style.height = "100%";
+      document.documentElement.style.overflow = "auto";
+      document.body.style.height = "100%";
+      document.body.style.minHeight = "100%";
+      document.body.style.overflow = "auto";
+      const root = document.getElementById("root");
+      if (root) {
+        root.style.minHeight = "100%";
+        root.style.height = "100%";
+      }
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/sw.js").catch(() => undefined);
       }

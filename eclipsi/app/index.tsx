@@ -31,7 +31,8 @@ export default function WelcomeScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Cadastro</Text>
+          <Text style={styles.brandTitle}>EcliPsi</Text>
+          <Text style={styles.title}>Bem-vindo</Text>
         </View>
 
         {/* Opções de Acesso */}
@@ -106,6 +107,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "column",
     gap: 10,
+  },
+  brandTitle: {
+    color: "#322c8e",
+    fontSize: 32,
+    fontWeight: "900",
   },
   logo: {
     width: width * 0.6,

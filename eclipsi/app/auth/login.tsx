@@ -4,6 +4,7 @@ import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
     Alert,
     Image,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -87,6 +88,12 @@ export default function LoginScreen() {
       {/* Fundo inferior com curva (cor escura) */}
       <View style={styles.backgroundBottom} />
 
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.container}>
         {/* Cabeçalho com Logo e Título */}
         <View style={styles.logoTitle}>
@@ -95,6 +102,7 @@ export default function LoginScreen() {
             style={styles.logo}
             resizeMode="contain"
           />
+          <Text style={styles.brandTitle}>EcliPsi</Text>
           <Text style={styles.title}>Login</Text>
         </View>
 
@@ -152,6 +160,7 @@ export default function LoginScreen() {
           </View>
         </View>
       </View>
+      </ScrollView>
     </View>
   );
 }
@@ -162,6 +171,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#322c8e",
     alignItems: "center",
     justifyContent: "center",
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    minHeight: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 24,
+    paddingBottom: 48,
   },
   backgroundTop: {
     position: "absolute",
@@ -201,9 +222,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logo: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+  brandTitle: {
+    color: "#322c8e",
+    fontSize: 32,
+    fontWeight: "900",
   },
   title: {
     color: "white",
