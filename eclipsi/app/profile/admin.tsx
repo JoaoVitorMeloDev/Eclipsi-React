@@ -1,3 +1,4 @@
+import { palette } from '../../lib/palette';
 import React, { useState, useEffect } from 'react';
 import { api, ApiError, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
 import * as ImagePicker from 'expo-image-picker';
@@ -177,7 +178,7 @@ export default function AdminScreen() {
             onPress={() => setSidebarOpen(true)}
             activeOpacity={0.7}
           >
-            <Ionicons name="menu" size={26} color="#FFFFFF" />
+            <Ionicons name="menu" size={26} color={palette.white} />
           </TouchableOpacity>
           <Image
             source={require("../../assets/images/logo.png")}
@@ -284,7 +285,7 @@ export default function AdminScreen() {
             <TextInput
               style={styles.subSearchInput}
               placeholder="Buscar por nome ou e-mail..."
-              placeholderTextColor="#888"
+              placeholderTextColor={palette.muted}
               maxLength={100}
               onChangeText={(text) => loadUsers(text)}
             />
@@ -452,7 +453,7 @@ export default function AdminScreen() {
                   <TextInput
                     style={styles.formInput}
                     placeholder="Deixe em branco para manter a atual"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={palette.muted}
                     secureTextEntry
                     value={adminPassword}
                     onChangeText={setAdminPassword}
@@ -577,10 +578,10 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: palette.cream,
   },
   header: {
-    backgroundColor: '#1E1B4B',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -607,23 +608,23 @@ const styles = StyleSheet.create({
   burgerLine: {
     width: 24,
     height: 3,
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 2,
   },
   logo: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: palette.white,
   },
   adminBadge: {
     marginLeft: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#4F46E5',
+    backgroundColor: palette.salmon,
   },
   adminBadgeText: {
-    color: '#FFFFFF',
+    color: palette.indigo,
     fontSize: 10,
     fontWeight: '900',
   },
@@ -633,7 +634,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   searchInput: {
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -656,7 +657,7 @@ const styles = StyleSheet.create({
     left: -280,
     width: 280,
     height: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     zIndex: 100,
     elevation: 10,
     shadowColor: '#000',
@@ -672,15 +673,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
   },
   sidebarTitle: {
-    color: '#ffffff',
+    color: palette.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   closeBtn: {
-    color: '#ffffff',
+    color: palette.white,
     fontSize: 28,
   },
   sidebarNav: {
@@ -691,14 +692,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   navItemActive: {
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.wine,
+    borderRadius: 12,
   },
   navItemText: {
     fontSize: 16,
     color: '#333333',
   },
   navItemTextActive: {
-    color: '#7500a8',
+    color: palette.white,
     fontWeight: 'bold',
   },
   logoutItem: {
@@ -706,7 +708,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
-    color: '#d9534f',
+    color: palette.wine,
     fontWeight: 'bold',
   },
   contentContainer: {
@@ -719,7 +721,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
     marginBottom: 8,
   },
   pageSubtitle: {
@@ -733,13 +735,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: palette.border,
     borderRadius: 20,
     marginBottom: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
   },
   tableContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 12,
     shadowColor: '#000',
@@ -750,14 +752,14 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
   tableHeaderText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontWeight: 'bold',
     fontSize: 13,
   },
@@ -767,7 +769,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: palette.border,
   },
   tableCell: {
     fontSize: 13,
@@ -779,22 +781,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignSelf: 'flex-start',
   },
-  badgeAdmin: { backgroundColor: '#EDE9FE' },
-  badgeMed: { backgroundColor: '#DBEAFE' },
+  badgeAdmin: { backgroundColor: palette.salmon },
+  badgeMed: { backgroundColor: palette.cream },
   badgePac: { backgroundColor: '#F1F5F9' },
   badgeText: { fontSize: 11, fontWeight: 'bold' },
-  badgeTextAdmin: { color: '#5B21B6' },
-  badgeTextMed: { color: '#1E40AF' },
+  badgeTextAdmin: { color: palette.indigo },
+  badgeTextMed: { color: palette.indigo },
   badgeTextPac: { color: '#334155' },
   btnEditUser: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 16,
     alignItems: 'center',
   },
   btnEditText: {
-    color: '#ffffff',
+    color: palette.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -804,18 +806,18 @@ const styles = StyleSheet.create({
   earningsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#58007e',
+    color: palette.indigo,
     marginBottom: 12,
   },
   earningsGrid: {
     gap: 16,
   },
   earningsCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#7500a8',
+    borderLeftColor: palette.indigo,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -823,7 +825,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   earningsCardHighlight: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     borderLeftWidth: 0,
   },
   earningsLabel: {
@@ -832,29 +834,29 @@ const styles = StyleSheet.create({
     color: '#666666',
     marginBottom: 6,
   },
-  highlightText: { color: '#e2c1f7' },
+  highlightText: { color: palette.salmon },
   earningsValue: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
     marginBottom: 4,
   },
-  highlightValue: { color: '#ffffff' },
+  highlightValue: { color: palette.white },
   earningsSubtext: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: palette.indigo,
   },
-  highlightSub: { color: '#f5dfff', fontWeight: 'normal' },
+  highlightSub: { color: palette.cream, fontWeight: 'normal' },
   statsCategoryGrid: {
     gap: 16,
   },
   categoryCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 10,
     padding: 16,
     borderTopWidth: 4,
-    borderTopColor: '#7500a8',
+    borderTopColor: palette.indigo,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -869,7 +871,7 @@ const styles = StyleSheet.create({
   categoryCardCount: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
   },
   categoryCardSub: {
     fontSize: 11,
@@ -880,7 +882,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   settingsGroup: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 20,
     gap: 16,
@@ -899,16 +901,16 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
   },
   avatarUploadBtn: {
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
     paddingVertical: 6,
     paddingHorizontal: 14,
     borderRadius: 16,
   },
   avatarUploadText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -922,16 +924,18 @@ const styles = StyleSheet.create({
   },
   formInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: palette.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
     color: '#333',
   },
   saveSettingsBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -939,9 +943,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   saveSettingsText: {
-    color: '#ffffff',
+    color: palette.white,
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 19,
   },
   bottomNav: {
     position: 'absolute',
@@ -949,7 +953,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 60,
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -961,6 +965,8 @@ const styles = StyleSheet.create({
   },
   bottomNavItemActive: {
     opacity: 1,
+    backgroundColor: palette.wine,
+    borderRadius: 12,
   },
   bottomNavIcon: {
     fontSize: 22,
@@ -977,7 +983,7 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     maxHeight: '85%',
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 20,
     shadowColor: '#000',
@@ -1007,14 +1013,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   btnDeleteUser: {
-    backgroundColor: '#d9534f',
+    backgroundColor: palette.wine,
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 12,
   },
   btnDeleteUserText: {
-    color: '#ffffff',
+    color: palette.white,
     fontWeight: 'bold',
     fontSize: 14,
   },

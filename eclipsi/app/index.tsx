@@ -1,173 +1,100 @@
-import { useRouter } from "expo-router";
-import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { PrimaryButton } from '../components/PrimaryButton';
+import { useRouter } from 'expo-router';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const { width } = Dimensions.get("window");
+import { palette } from '../lib/palette';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const handleLogin = () => router.push("/auth/login");
-  const handleRegister = () => router.push("/auth/cadastro");
+  const handleLogin = () => router.push('/auth/login');
+  const handleRegister = () => router.push('/auth/cadastro');
 
   return (
-    <View style={styles.screenContainer}>
-      {/* Fundo superior (cor clara) */}
-      <View pointerEvents="none" style={styles.backgroundTop} />
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <View style={styles.brand}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+          accessibilityLabel="EcliPsi"
+        />
+      </View>
 
-      {/* Fundo inferior com a cor escura */}
-      <View pointerEvents="none" style={styles.backgroundBottom} />
-
-      <View style={styles.container}>
-        {/* Bloco do Logotipo e Título */}
-        <View style={styles.logoTitle}>
-          <View style={styles.brandRow}>
-            <Image
-              source={require("../assets/images/logo.png")}
-              style={styles.brandBadge}
-              resizeMode="contain"
-            />
-            <Text style={styles.brandTitle}>EcliPsi</Text>
-          </View>
+      <View style={styles.panel}>
+        <View style={styles.actions}>
           <Text style={styles.title}>Bem-vindo</Text>
-        </View>
-
-        {/* Opções de Acesso */}
-        <View style={styles.registerOption}>
-          <TouchableOpacity
-            style={styles.optionRegister}
+          <PrimaryButton
+            style={styles.button}
             onPress={handleLogin}
-            activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>Fazer login</Text>
-          </TouchableOpacity>
+          </PrimaryButton>
 
-          <TouchableOpacity
-            style={styles.optionRegister}
+          <PrimaryButton
+            style={styles.button}
             onPress={handleRegister}
-            activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>Fazer um cadastro</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.registerP}>
-            Já fez um cadastro?{" "}
-            <Text style={styles.registerLink} onPress={handleLogin}>
-              Clique aqui!
-            </Text>
-          </Text>
+          </PrimaryButton>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screenContainer: {
+  screen: {
     flex: 1,
-    minHeight: "100%",
-    backgroundColor: "#322c8e",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: palette.cream,
   },
-  backgroundTop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "50%",
-    backgroundColor: "#ffeec2",
-    zIndex: 0,
-    pointerEvents: "none",
+  content: {
+    flexGrow: 1,
   },
-  backgroundBottom: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    height: "70%",
-    backgroundColor: "#322c8e",
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 80,
-    zIndex: 0,
-    pointerEvents: "none",
-  },
-  container: {
-    position: "relative",
-    zIndex: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    width: "90%",
-    maxWidth: 500,
-    gap: 25,
-  },
-  logoTitle: {
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    gap: 10,
-  },
-  brandTitle: {
-    color: "#322c8e",
-    fontSize: 32,
-    fontWeight: "900",
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  brandBadge: {
-    width: 44,
-    height: 44,
+  brand: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
   },
   logo: {
-    width: width * 0.6,
-    height: width * 0.6,
-    maxWidth: 250,
-    maxHeight: 250,
-    borderRadius: 125,
+    width: 120,
+    height: 120,
+  },
+  panel: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.indigo,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  actions: {
+    width: '100%',
+    maxWidth: 440,
+    gap: 14,
   },
   title: {
-    color: "#ffffff",
+    color: palette.cream,
     fontSize: 30,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
   },
-  registerOption: {
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "column",
-    gap: 25,
-    width: "100%",
-  },
-  optionRegister: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderBottomWidth: 5,
-    borderBottomColor: "#7500a8",
-    borderRadius: 15,
-    backgroundColor: "#d196eb",
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderBottomWidth: 4,
+    borderBottomColor: palette.wine,
+    borderRadius: 14,
+    backgroundColor: palette.magenta,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1d0027",
-  },
-  registerP: {
-    color: "#ffffff",
-    fontSize: 14,
-  },
-  registerLink: {
-    color: "#00ffea",
-    textDecorationLine: "underline",
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: palette.white,
+    textAlign: 'center',
   },
 });

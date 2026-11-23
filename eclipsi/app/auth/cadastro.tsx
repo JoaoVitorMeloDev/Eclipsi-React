@@ -1,15 +1,14 @@
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { palette } from '../../lib/palette';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-    Dimensions,
     Image,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
-
-const { width } = Dimensions.get("window");
 
 export default function CadastroEscolhaScreen() {
   const router = useRouter();
@@ -37,21 +36,19 @@ export default function CadastroEscolhaScreen() {
         </View>
 
         <View style={styles.registerOption}>
-          <TouchableOpacity
+          <PrimaryButton
             style={styles.optionRegister}
             onPress={handleMedChange}
-            activeOpacity={0.8}
           >
             <Text style={styles.btnText}>Cadastrar-se como médico</Text>
-          </TouchableOpacity>
+          </PrimaryButton>
 
-          <TouchableOpacity
+          <PrimaryButton
             style={styles.optionRegister}
             onPress={handlePacChange}
-            activeOpacity={0.8}
           >
             <Text style={styles.btnText}>Cadastrar-se como paciente</Text>
-          </TouchableOpacity>
+          </PrimaryButton>
 
           <TouchableOpacity
             style={styles.backBtn}
@@ -77,7 +74,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     minHeight: "100%",
-    backgroundColor: "#322c8e",
+    backgroundColor: palette.indigo,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -87,7 +84,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "50%",
-    backgroundColor: "#ffeec2",
+    backgroundColor: palette.cream,
     zIndex: 0,
   },
   backgroundBottom: {
@@ -96,9 +93,9 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "70%",
-    backgroundColor: "#322c8e",
-    borderTopLeftRadius: width * 0.5,
-    borderTopRightRadius: width * 0.5,
+    backgroundColor: palette.indigo,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
     zIndex: 0,
   },
   container: {
@@ -120,9 +117,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logo: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+    width: 120,
+    height: 120,
   },
   title: {
     color: "white",
@@ -144,14 +140,15 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 12,
     borderBottomWidth: 5,
-    borderBottomColor: "#7500a8",
+    borderBottomColor: palette.wine,
     borderRadius: 15,
-    backgroundColor: "#d196eb",
+    backgroundColor: palette.magenta,
   },
   btnText: {
-    color: "#1d0027",
-    fontWeight: "600",
-    fontSize: 16,
+    color: palette.white,
+    fontWeight: "bold",
+    fontSize: 19,
+    textAlign: "center",
   },
   backBtn: {
     display: "flex",
@@ -159,13 +156,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 12,
     width: "100%",
-    borderBottomWidth: 5,
-    borderBottomColor: "#4a4a4a",
+    borderWidth: 1,
+    borderColor: palette.border,
     borderRadius: 15,
-    backgroundColor: "#a8a8a8",
+    backgroundColor: palette.neutral,
   },
   backBtnText: {
-    color: "#1d0027",
+    color: palette.indigo,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -179,8 +176,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   registerLink: {
-    color: "rgb(0, 255, 234)",
+    color: palette.cream,
     fontWeight: "bold",
     fontSize: 14,
+    textDecorationLine: "underline",
   },
 });

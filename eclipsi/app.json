@@ -26,8 +26,8 @@
       "name": "EcliPsi",
       "shortName": "EcliPsi",
       "description": "Busca, agendamento e acompanhamento em saúde mental",
-      "themeColor": "#322c8e",
-      "backgroundColor": "#ffeec2",
+      "themeColor": "#2E2382",
+      "backgroundColor": "#FFF0C2",
       "display": "standalone",
       "orientation": "portrait"
     },

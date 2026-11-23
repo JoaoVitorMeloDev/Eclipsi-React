@@ -1,14 +1,15 @@
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { FormInput } from '../../components/FormInput';
+import { palette } from '../../lib/palette';
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
-    Alert,
     ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -115,10 +116,10 @@ export default function LoginScreen() {
         <View style={styles.register}>
           <View style={styles.registerForm}>
             <View style={styles.sentenceLine}>
-              <TextInput
-                style={styles.registerInput}
+              <FormInput
+                accessibilityLabel="Digite seu e-mail"
                 placeholder="Digite seu e-mail"
-                placeholderTextColor="#64748B"
+                placeholderTextColor={palette.muted}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -127,10 +128,10 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.sentenceLine}>
-              <TextInput
-                style={styles.registerInput}
+              <FormInput
+                accessibilityLabel="Digite sua senha"
                 placeholder="Digite sua senha"
-                placeholderTextColor="#64748B"
+                placeholderTextColor={palette.muted}
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -141,21 +142,20 @@ export default function LoginScreen() {
               {feedback ? (
                 <Text accessibilityRole="alert" style={styles.feedback}>{feedback}</Text>
               ) : null}
-              <TouchableOpacity
+              <PrimaryButton
                 style={styles.registerBtn}
                 onPress={handleLogin}
                 disabled={loading}
-                activeOpacity={0.8}
               >
                 {loading ? (
                   <View style={styles.loadingRow}>
-                    <ActivityIndicator color="#1d0027" />
+                    <ActivityIndicator color={palette.white} />
                     <Text style={styles.btnTextBold}>Entrando...</Text>
                   </View>
                 ) : (
                   <Text style={styles.btnTextBold}>Entrar</Text>
                 )}
-              </TouchableOpacity>
+              </PrimaryButton>
 
               <TouchableOpacity
                 style={styles.backBtn}
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     minHeight: "100%",
-    backgroundColor: "#322c8e",
+    backgroundColor: palette.indigo,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 24,
-    paddingBottom: 48,
+    paddingBottom: 32,
   },
   backgroundTop: {
     position: "absolute",
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "50%",
-    backgroundColor: "#ffeec2",
+    backgroundColor: palette.cream,
     zIndex: 0,
   },
   backgroundBottom: {
@@ -219,26 +219,26 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "70%",
-    backgroundColor: "#322c8e",
-    borderTopLeftRadius: 150, // Adaptação nativa da curva CSS
-    borderTopRightRadius: 150,
+    backgroundColor: palette.indigo,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
     zIndex: 0,
   },
   container: {
     position: "relative",
     zIndex: 10,
-    backgroundColor: "#FFFFFF",
-    padding: 24,
+    backgroundColor: palette.white,
+    padding: 20,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
     maxWidth: 500,
     width: "90%",
     gap: 25,
-    borderRadius: 15,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    shadowColor: "#0F172A",
+    borderColor: palette.border,
+    shadowColor: palette.indigo,
     shadowOpacity: 0.12,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     borderRadius: 75,
   },
   brandTitle: {
-    color: "#322c8e",
+    color: palette.indigo,
     fontSize: 32,
     fontWeight: "900",
   },
@@ -270,9 +270,10 @@ const styles = StyleSheet.create({
     height: 44,
   },
   title: {
-    color: "#0F172A",
+    color: palette.indigo,
     fontSize: 30,
     fontWeight: "bold",
+    textAlign: "center",
   },
   register: {
     alignItems: "center",
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    gap: 25,
+    gap: 16,
     width: "100%",
   },
   sentenceLine: {
@@ -298,39 +299,30 @@ const styles = StyleSheet.create({
     gap: 10,
     width: "100%",
   },
-  registerInput: {
-    padding: 12,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 15,
-    backgroundColor: "white",
-    fontSize: 16,
-    color: "#0F172A",
-  },
   registerBtn: {
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
     borderWidth: 0,
     borderBottomWidth: 5,
-    borderBottomColor: "#7500a8",
+    borderBottomColor: palette.wine,
     borderRadius: 15,
-    backgroundColor: "#d196eb",
+    backgroundColor: palette.magenta,
     width: "100%",
   },
   btnTextBold: {
     fontWeight: "bold",
-    color: "#1d0027",
-    fontSize: 16,
+    color: palette.white,
+    fontSize: 19,
+    textAlign: "center",
   },
   feedback: {
     width: "100%",
     borderRadius: 10,
     padding: 10,
     textAlign: "center",
-    color: "#991B1B",
-    backgroundColor: "#FEE2E2",
+    color: palette.wine,
+    backgroundColor: palette.salmon,
     fontWeight: "600",
   },
   loadingRow: {
@@ -344,7 +336,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   registerLink: {
-    color: "rgb(0, 255, 234)",
+    color: palette.wine,
     fontWeight: "bold",
   },
   backBtn: {
@@ -352,14 +344,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 12,
     width: "100%",
-    borderWidth: 0,
-    borderBottomWidth: 5,
-    borderBottomColor: "#4a4a4a",
+    borderWidth: 1,
+    borderColor: palette.border,
     borderRadius: 15,
-    backgroundColor: "#a8a8a8",
+    backgroundColor: palette.neutral,
   },
   backBtnText: {
-    color: "#1d0027",
+    color: palette.indigo,
     fontWeight: "bold",
     fontSize: 16,
   },

@@ -1,14 +1,15 @@
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { FormInput } from '../../components/FormInput';
+import { palette } from '../../lib/palette';
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
-    Alert,
     ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -128,10 +129,10 @@ export default function CadastroUserScreen() {
             <View style={styles.registerForm}>
               {/* Nome */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
+                <FormInput
+                  accessibilityLabel="Coloque seu nome"
                   placeholder="Coloque seu nome"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={palette.muted}
                   value={name}
                   onChangeText={setName}
                 />
@@ -139,10 +140,10 @@ export default function CadastroUserScreen() {
 
               {/* E-mail */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
+                <FormInput
+                  accessibilityLabel="Coloque seu email"
                   placeholder="Coloque seu email"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={palette.muted}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={email}
@@ -152,10 +153,10 @@ export default function CadastroUserScreen() {
 
               {/* Telefone */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
+                <FormInput
+                  accessibilityLabel="Telefone / WhatsApp (DD + número)"
                   placeholder="Telefone / WhatsApp (DD + número)"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={palette.muted}
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={(value) => setPhone(formatPhone(value))}
@@ -166,10 +167,10 @@ export default function CadastroUserScreen() {
               {/* Idade e Gênero (Lado a lado) */}
               <View style={styles.formRow}>
                 <View style={[styles.sentenceLine, { flex: 1 }]}>
-                  <TextInput
-                    style={styles.registerInput}
+                  <FormInput
+                    accessibilityLabel="Idade"
                     placeholder="Idade"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={palette.muted}
                     keyboardType="numeric"
                     maxLength={3}
                     value={age}
@@ -194,10 +195,10 @@ export default function CadastroUserScreen() {
 
               {/* Senha */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
+                <FormInput
+                  accessibilityLabel="Coloque sua senha"
                   placeholder="Coloque sua senha"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor={palette.muted}
                   secureTextEntry
                   value={password}
                   onChangeText={setPassword}
@@ -206,8 +207,8 @@ export default function CadastroUserScreen() {
 
               {/* Confirmação de Senha */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
+                <FormInput
+                  accessibilityLabel="Confirme sua senha"
                   placeholder="Confirme sua senha"
                   placeholderTextColor="#888"
                   secureTextEntry
@@ -226,20 +227,20 @@ export default function CadastroUserScreen() {
                     {feedback.text}
                   </Text>
                 ) : null}
-                <TouchableOpacity
+                <PrimaryButton
                   style={styles.registerBtn}
                   onPress={handleRegister}
                   disabled={loading}
                 >
                   {loading ? (
                     <View style={styles.loadingRow}>
-                      <ActivityIndicator color="#1d0027" />
+                      <ActivityIndicator color={palette.white} />
                       <Text style={styles.registerBtnText}>Cadastrando...</Text>
                     </View>
                   ) : (
                     <Text style={styles.registerBtnText}>Cadastrar-se!</Text>
                   )}
-                </TouchableOpacity>
+                </PrimaryButton>
 
                 <TouchableOpacity
                   style={styles.backBtn}
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
   containerMain: {
     flex: 1,
     minHeight: "100%",
-    backgroundColor: "#322c8e",
+    backgroundColor: palette.indigo,
   },
   backgroundTop: {
     position: "absolute",
@@ -278,7 +279,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "50%",
-    backgroundColor: "#ffeec2",
+    backgroundColor: palette.cream,
     zIndex: 0,
   },
   backgroundBottom: {
@@ -287,9 +288,9 @@ const styles = StyleSheet.create({
     left: 0,
     width: "100%",
     height: "80%",
-    backgroundColor: "#322c8e",
-    borderTopLeftRadius: 100,
-    borderTopRightRadius: 100,
+    backgroundColor: palette.indigo,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
     zIndex: 0,
   },
   scrollContainer: {
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     alignItems: "center",
     paddingTop: 24,
-    paddingBottom: 48,
+    paddingBottom: 32,
     zIndex: 10,
   },
   scrollView: {
@@ -310,14 +311,17 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     zIndex: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
-    padding: 24,
+    backgroundColor: palette.white,
+    padding: 20,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
     width: "90%",
     maxWidth: 500,
     gap: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: palette.border,
   },
   logoTitle: {
     alignItems: "center",
@@ -335,7 +339,7 @@ const styles = StyleSheet.create({
     height: 44,
   },
   brandTitle: {
-    color: "#0F172A",
+    color: palette.indigo,
     fontSize: 30,
     fontWeight: "900",
   },
@@ -345,9 +349,10 @@ const styles = StyleSheet.create({
     borderRadius: 75,
   },
   title: {
-    color: "#0F172A",
+    color: palette.indigo,
     fontSize: 28,
     fontWeight: "bold",
+    textAlign: "center",
   },
   register: {
     alignItems: "center",
@@ -358,7 +363,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    gap: 18,
+    gap: 16,
     width: "100%",
   },
   formRow: {
@@ -379,20 +384,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: "#CBD5E1",
+    borderColor: palette.border,
     borderRadius: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.white,
   },
   optionChipActive: {
-    backgroundColor: "#322c8e",
-    borderColor: "#322c8e",
+    backgroundColor: palette.wine,
+    borderColor: palette.wine,
   },
   optionChipText: {
-    color: "#0F172A",
+    color: palette.indigo,
     fontSize: 12,
   },
   optionChipTextActive: {
-    color: "#FFFFFF",
+    color: palette.white,
   },
   sentenceLine: {
     alignItems: "center",
@@ -407,43 +412,34 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 10,
   },
-  registerInput: {
-    padding: 12,
-    width: "100%",
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#FFFFFF",
-    color: "#0F172A",
-    fontSize: 14,
-  },
   registerBtn: {
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
     width: "100%",
     borderBottomWidth: 5,
-    borderBottomColor: "#7500a8",
+    borderBottomColor: palette.wine,
     borderRadius: 15,
-    backgroundColor: "#d196eb",
+    backgroundColor: palette.magenta,
   },
   registerBtnText: {
-    color: "#1d0027",
+    color: palette.white,
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 19,
+    textAlign: "center",
   },
   backBtn: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 10,
+    padding: 12,
     width: "100%",
-    borderBottomWidth: 5,
-    borderBottomColor: "#4a4a4a",
+    borderWidth: 1,
+    borderColor: palette.border,
     borderRadius: 15,
-    backgroundColor: "#a8a8a8",
+    backgroundColor: palette.neutral,
   },
   backBtnText: {
-    color: "#1d0027",
+    color: palette.indigo,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -453,8 +449,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   registerLink: {
-    color: "rgb(0, 255, 234)",
+    color: palette.wine,
     textDecorationLine: "underline",
+    fontWeight: "bold",
   },
   feedback: {
     width: "100%",
@@ -464,12 +461,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   feedbackError: {
-    color: "#991B1B",
-    backgroundColor: "#FEE2E2",
+    color: palette.wine,
+    backgroundColor: palette.salmon,
   },
   feedbackSuccess: {
-    color: "#166534",
-    backgroundColor: "#DCFCE7",
+    color: palette.indigo,
+    backgroundColor: palette.cream,
   },
   loadingRow: {
     flexDirection: "row",

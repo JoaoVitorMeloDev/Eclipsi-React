@@ -1,3 +1,4 @@
+import { palette } from '../lib/palette';
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { Stack } from "expo-router";
@@ -33,7 +34,7 @@ export default function RootLayout() {
         theme.setAttribute("name", "theme-color");
         document.head.appendChild(theme);
       }
-      theme.setAttribute("content", "#322c8e");
+      theme.setAttribute("content", palette.indigo);
     }
   }, []);
   return (

@@ -1,3 +1,4 @@
+import { palette } from '../../lib/palette';
 import React, { useEffect, useState } from 'react';
 import { api, ApiError, clearAuthSession, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
 import { useRouter } from 'expo-router';
@@ -188,7 +189,7 @@ export default function UserScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Pesquisar..."
-            placeholderTextColor="#fe9e8e"
+            placeholderTextColor={palette.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -200,7 +201,7 @@ export default function UserScreen() {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7500a8" />
+            <ActivityIndicator size="large" color={palette.indigo} />
             <Text style={styles.loadingText}>Carregando dados...</Text>
           </View>
         ) : (
@@ -213,7 +214,7 @@ export default function UserScreen() {
             {/* Próximas Consultas */}
             <View style={styles.homeSection}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome5 name="calendar-check" size={16} color="#7500a8" /> Próximas Consultas
+                <FontAwesome5 name="calendar-check" size={16} color={palette.indigo} /> Próximas Consultas
               </Text>
               {upcomingAppointments.map((item) => (
                 <TouchableOpacity
@@ -269,7 +270,7 @@ export default function UserScreen() {
             {/* Consultas Realizadas */}
             <View style={styles.homeSection}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome5 name="clock" size={16} color="#7500a8" /> Consultas Realizadas
+                <FontAwesome5 name="clock" size={16} color={palette.indigo} /> Consultas Realizadas
               </Text>
               {completedAppointments.map((item) => (
                 <TouchableOpacity
@@ -388,7 +389,7 @@ export default function UserScreen() {
                 style={styles.settingsNavBtn}
                 onPress={() => setActiveTab('configuracoes')}
               >
-                <FontAwesome5 name="cog" size={14} color="#7500a8" />
+                <FontAwesome5 name="cog" size={14} color={palette.indigo} />
                 <Text style={styles.settingsNavBtnText}>Configurações</Text>
               </TouchableOpacity>
             </View>
@@ -454,7 +455,7 @@ export default function UserScreen() {
           <View>
             <View style={styles.settingsHeaderContainer}>
               <TouchableOpacity style={styles.btnBack} onPress={() => setActiveTab('perfil')}>
-                <FontAwesome5 name="arrow-left" size={16} color="#7500a8" />
+                <FontAwesome5 name="arrow-left" size={16} color={palette.indigo} />
                 <Text style={styles.btnBackText}>Voltar</Text>
               </TouchableOpacity>
               <Text style={styles.pageTitle}>Configurações</Text>
@@ -597,19 +598,19 @@ export default function UserScreen() {
           style={[styles.navItem, activeTab === 'home' && styles.navItemActive]}
           onPress={() => setActiveTab('home')}
         >
-          <FontAwesome5 name="house-user" size={20} color="#ffffff" />
+          <FontAwesome5 name="house-user" size={20} color={palette.white} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.navItem, activeTab === 'consultas' && styles.navItemActive]}
           onPress={() => setActiveTab('consultas')}
         >
-          <FontAwesome5 name="search" size={20} color="#ffffff" />
+          <FontAwesome5 name="search" size={20} color={palette.white} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.navItem, activeTab === 'perfil' && styles.navItemActive]}
           onPress={() => setActiveTab('perfil')}
         >
-          <FontAwesome5 name="user" size={20} color="#ffffff" />
+          <FontAwesome5 name="user" size={20} color={palette.white} />
         </TouchableOpacity>
       </View>
 
@@ -710,10 +711,10 @@ export default function UserScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffeec2',
+    backgroundColor: palette.cream,
   },
   header: {
-    backgroundColor: '#322c8e',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -737,7 +738,7 @@ const styles = StyleSheet.create({
   burgerLine: {
     width: 24,
     height: 3,
-    backgroundColor: '#f80174',
+    backgroundColor: palette.cream,
     borderRadius: 2,
   },
   logoImage: {
@@ -756,7 +757,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: palette.white,
   },
   profileImg: {
     width: 40,
@@ -764,12 +765,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   searchInput: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 6,
     fontSize: 14,
-    color: '#fe9e8e',
+    color: palette.muted,
     width: 120,
   },
   contentContainer: {
@@ -779,7 +780,7 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#322c8e',
+    color: palette.indigo,
     marginBottom: 4,
   },
   pageSubtitle: {
@@ -793,16 +794,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
     marginBottom: 12,
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: '#e0b0ff',
+    backgroundColor: palette.salmon,
     marginVertical: 24,
   },
   appointmentCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -815,7 +816,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   doctorCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -839,7 +840,7 @@ const styles = StyleSheet.create({
   cardDoctorName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#322c8e',
+    color: palette.indigo,
   },
   specialty: {
     fontSize: 13,
@@ -849,12 +850,12 @@ const styles = StyleSheet.create({
   },
   cardDate: {
     fontSize: 13,
-    color: '#ff3131',
+    color: palette.wine,
     marginBottom: 2,
   },
   cardPrice: {
     fontSize: 13,
-    color: '#ff3131',
+    color: palette.wine,
     marginBottom: 4,
   },
   cardPreview: {
@@ -864,12 +865,12 @@ const styles = StyleSheet.create({
   },
   cardRating: {
     fontSize: 13,
-    color: '#ff9800',
+    color: palette.wine,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   upcomingBadge: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: palette.salmon,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -877,38 +878,43 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   upcomingBadgeText: {
-    color: '#0d47a1',
+    color: palette.indigo,
     fontSize: 11,
     fontWeight: 'bold',
   },
   cardActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   viewBtn: {
-    backgroundColor: '#322c8e',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   viewBtnText: {
-    color: '#ffffff',
-    fontSize: 12,
+    color: palette.white,
+    fontSize: 19,
     fontWeight: 'bold',
   },
   rateBtn: {
-    backgroundColor: '#ff9800',
+    backgroundColor: palette.wine,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   rateBtnText: {
-    color: '#ffffff',
+    color: palette.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
   viewDoctorBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
@@ -916,8 +922,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   viewDoctorBtnText: {
-    color: '#ffffff',
-    fontSize: 12,
+    color: palette.white,
+    fontSize: 19,
     fontWeight: 'bold',
   },
   bottomNav: {
@@ -926,7 +932,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 60,
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -939,6 +945,8 @@ const styles = StyleSheet.create({
   navItemActive: {
     opacity: 1,
     transform: [{ scale: 1.15 }],
+    backgroundColor: palette.wine,
+    borderRadius: 12,
   },
   modalBackdrop: {
     flex: 1,
@@ -948,7 +956,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 20,
     width: '100%',
@@ -984,7 +992,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#7500a8',
+    borderLeftColor: palette.indigo,
     marginTop: 8,
   },
   feedbackText: {
@@ -1004,7 +1012,7 @@ const styles = StyleSheet.create({
   },
   settingsNavBtn: {
     borderWidth: 1,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -1013,12 +1021,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   settingsNavBtnText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontWeight: 'bold',
     fontSize: 12,
   },
   settingsGroup: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     gap: 12,
@@ -1038,16 +1046,16 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
   },
   avatarUploadBtn: {
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   avatarUploadBtnText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -1061,28 +1069,30 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: palette.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
   saveSettingsBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     padding: 12,
     borderRadius: 20,
     alignItems: 'center',
     marginTop: 8,
   },
   saveSettingsBtnText: {
-    color: '#ffffff',
+    color: palette.white,
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 19,
   },
   settingsHeaderContainer: {
     flexDirection: 'row',
@@ -1096,15 +1106,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   btnBackText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontWeight: 'bold',
   },
   groupTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
     borderBottomWidth: 2,
-    borderBottomColor: '#f5dfff',
+    borderBottomColor: palette.cream,
     paddingBottom: 4,
   },
   loadingContainer: {
@@ -1122,8 +1132,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: '#DCFCE7',
-    color: '#166534',
+    backgroundColor: palette.cream,
+    color: palette.indigo,
     textAlign: 'center',
   },
   drawerBackdrop: {
@@ -1137,7 +1147,7 @@ const styles = StyleSheet.create({
   drawer: {
     width: 280,
     maxWidth: '80%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     paddingTop: 32,
     paddingHorizontal: 16,
     shadowColor: '#000',
@@ -1146,7 +1156,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   drawerTitle: {
-    color: '#322c8e',
+    color: palette.indigo,
     fontSize: 24,
     fontWeight: '900',
     marginBottom: 24,
@@ -1154,10 +1164,10 @@ const styles = StyleSheet.create({
   drawerItem: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: palette.border,
   },
   drawerItemText: {
-    color: '#0F172A',
+    color: palette.indigo,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -1170,7 +1180,7 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     alignSelf: 'center',
     margin: 'auto',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     borderRadius: 16,
     padding: 24,
   },
@@ -1179,12 +1189,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   modalBodyText: {
-    color: '#0F172A',
+    color: palette.indigo,
     lineHeight: 20,
     marginVertical: 12,
   },
   modalPrice: {
-    color: '#166534',
+    color: palette.indigo,
     fontWeight: '800',
     marginBottom: 12,
   },

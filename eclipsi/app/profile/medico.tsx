@@ -1,3 +1,4 @@
+import { palette } from '../../lib/palette';
 import React, { useEffect, useState } from 'react';
 import { api, ApiError, clearAuthSession } from '../../lib/api';
 import { useRouter } from 'expo-router';
@@ -111,7 +112,7 @@ export default function MedicoScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity onPress={() => setMenuOpen(true)} accessibilityLabel="Abrir menu">
-            <Ionicons name="menu" size={26} color="#FFFFFF" />
+            <Ionicons name="menu" size={26} color={palette.white} />
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Image
@@ -126,7 +127,7 @@ export default function MedicoScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Pesquisar pacientes..."
-            placeholderTextColor="#888"
+            placeholderTextColor={palette.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -138,7 +139,7 @@ export default function MedicoScreen() {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7500a8" />
+            <ActivityIndicator size="large" color={palette.indigo} />
             <Text style={styles.loadingText}>Carregando dados...</Text>
           </View>
         ) : (
@@ -412,7 +413,7 @@ export default function MedicoScreen() {
                   }}
                 >
                   {prescriptionLoading ? (
-                    <><ActivityIndicator size="small" color="#FFFFFF" /><Text style={styles.btnText}>Salvando...</Text></>
+                    <><ActivityIndicator size="small" color={palette.white} /><Text style={styles.btnText}>Salvando...</Text></>
                   ) : (
                     <Text style={styles.btnText}>Salvar no Prontuário</Text>
                   )}
@@ -439,7 +440,7 @@ export default function MedicoScreen() {
                   }}
                 >
                   {concludeLoading ? (
-                    <><ActivityIndicator size="small" color="#FFFFFF" /><Text style={styles.btnText}>Concluindo...</Text></>
+                    <><ActivityIndicator size="small" color={palette.white} /><Text style={styles.btnText}>Concluindo...</Text></>
                   ) : (
                     <Text style={styles.btnText}>Concluir Consulta</Text>
                   )}
@@ -519,10 +520,10 @@ export default function MedicoScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
   },
   header: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -545,10 +546,10 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: palette.white,
   },
   searchInput: {
-    backgroundColor: '#f5dfff',
+    backgroundColor: palette.cream,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -580,7 +581,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   appointmentCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -591,7 +592,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   doctorCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -631,7 +632,7 @@ const styles = StyleSheet.create({
   cardPrice: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#2e7d32',
+    color: palette.indigo,
     marginBottom: 6,
   },
   cardPreview: {
@@ -642,11 +643,13 @@ const styles = StyleSheet.create({
   },
   cardRating: {
     fontSize: 12,
-    color: '#2e7d32',
+    color: palette.indigo,
     marginBottom: 6,
   },
   viewBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -654,7 +657,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   viewDoctorBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -662,9 +667,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnText: {
-    color: '#ffffff',
+    color: palette.white,
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 19,
   },
   bottomNav: {
     position: 'absolute',
@@ -672,7 +677,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 60,
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -685,6 +690,8 @@ const styles = StyleSheet.create({
   },
   bottomNavActive: {
     opacity: 1,
+    backgroundColor: palette.wine,
+    borderRadius: 12,
   },
   bottomNavIcon: {
     fontSize: 22,
@@ -696,7 +703,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 20,
     width: '90%',
@@ -739,7 +746,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#7500a8',
+    borderLeftColor: palette.indigo,
   },
   feedbackText: {
     fontSize: 13,
@@ -753,13 +760,13 @@ const styles = StyleSheet.create({
   },
   settingsNavBtn: {
     borderWidth: 1,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
   settingsNavBtnText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -768,13 +775,13 @@ const styles = StyleSheet.create({
   },
   btnBack: {
     borderWidth: 1,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
   btnBackText: {
-    color: '#7500a8',
+    color: palette.indigo,
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -784,25 +791,25 @@ const styles = StyleSheet.create({
   earningsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#58007e',
+    color: palette.indigo,
     marginBottom: 10,
   },
   earningsGrid: {
     gap: 12,
   },
   earningsCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#7500a8',
+    borderLeftColor: palette.indigo,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     elevation: 2,
   },
   earningsCardHighlight: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.indigo,
     borderLeftWidth: 0,
   },
   earningsLabel: {
@@ -812,31 +819,31 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   earningsLabelHighlight: {
-    color: '#e2c1f7',
+    color: palette.salmon,
   },
   earningsValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
     marginBottom: 2,
   },
   earningsValueHighlight: {
-    color: '#ffffff',
+    color: palette.white,
   },
   earningsSubtext: {
     fontSize: 11,
-    color: '#2e7d32',
+    color: palette.indigo,
     fontWeight: 'bold',
   },
   earningsSubtextHighlight: {
-    color: '#f5dfff',
+    color: palette.cream,
     fontWeight: 'normal',
   },
   settingsForm: {
     gap: 16,
   },
   settingsGroup: {
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -861,12 +868,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: palette.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
   },
   textArea: {
     height: 80,
@@ -881,10 +888,12 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#7500a8',
+    borderColor: palette.indigo,
   },
   saveSettingsBtn: {
-    backgroundColor: '#7500a8',
+    backgroundColor: palette.magenta,
+    borderBottomWidth: 3,
+    borderBottomColor: palette.wine,
     borderRadius: 20,
     paddingVertical: 10,
     alignItems: 'center',
@@ -893,7 +902,7 @@ const styles = StyleSheet.create({
   consultationHistoryCard: {
     backgroundColor: '#f9f9f9',
     borderLeftWidth: 4,
-    borderLeftColor: '#7500a8',
+    borderLeftColor: palette.indigo,
     padding: 10,
     borderRadius: 6,
     marginTop: 8,
@@ -907,7 +916,7 @@ const styles = StyleSheet.create({
   consultationHistoryType: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#7500a8',
+    color: palette.indigo,
   },
   consultationHistoryDate: {
     fontSize: 11,
@@ -932,8 +941,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: '#DCFCE7',
-    color: '#166534',
+    backgroundColor: palette.cream,
+    color: palette.indigo,
     textAlign: 'center',
   },
   menuBackdrop: {
@@ -947,17 +956,17 @@ const styles = StyleSheet.create({
   menuPanel: {
     width: 280,
     maxWidth: '80%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.white,
     paddingTop: 32,
     paddingHorizontal: 16,
   },
   menuItem: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: palette.border,
   },
   menuItemText: {
-    color: '#0F172A',
+    color: palette.indigo,
     fontSize: 16,
     fontWeight: '700',
   },
