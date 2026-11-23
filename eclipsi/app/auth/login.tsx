@@ -1,3 +1,4 @@
+import { AcademicDemoNotice } from '../../components/AcademicDemoNotice';
 import { getVerifiedRole, profileRoutes } from '../../lib/auth';
 import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -171,6 +172,7 @@ function LoginScreen() {
             </View>
           </View>
         </View>
+        <AcademicDemoNotice />
       </View>
       </ScrollView>
     </View>
