@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { api, ApiError } from "../../lib/api";
+import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -46,13 +46,24 @@ export default function LoginScreen() {
       const data = await api<{
         success?: boolean;
         message?: string;
+        token?: string;
+        access_token?: string;
         user?: { tipo?: string; role?: string };
-      }>("/api/login", {
+      }>("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
       });
       if (data.success) {
-        const tipo = String(data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
+        const token = data.token ?? data.access_token;
+        if (!token) {
+          throw new ApiError("O servidor nao retornou o token.", 401);
+        }
+        await setAuthToken(token);
+        const session = await api<{
+          success?: boolean;
+          user?: { role?: string };
+        }>("/api/me");
+        const tipo = String(session.user?.role ?? data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
         if (tipo.includes("admin")) router.replace("/profile/admin");
         else if (tipo.includes("med") || tipo.includes("doctor")) router.replace("/profile/medico");
         else router.replace("/profile/user");

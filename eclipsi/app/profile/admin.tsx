@@ -40,7 +40,7 @@ export default function AdminScreen() {
   // Funções de API simuladas / adaptadas para React Native (fetch)
   const loadUsers = async (query = '') => {
     try {
-      const data = await api<{ success?: boolean; users?: any[] }>('/api/admin/users');
+      const data = await api<{ success?: boolean; users?: any[] }>('/api/v1/admin/users');
       if (data.success) {
         let filtered = data.users ?? [];
         if (query) {
@@ -60,7 +60,7 @@ export default function AdminScreen() {
 
   const loadStats = async () => {
     try {
-      const data = await api<{ success?: boolean; stats?: any }>('/api/admin/stats');
+      const data = await api<{ success?: boolean; stats?: any }>('/api/v1/admin/stats');
       if (data.success) {
         setStats(data.stats ?? {});
       }
@@ -72,11 +72,11 @@ export default function AdminScreen() {
 
   const loadAdminProfile = async () => {
     try {
-      const data = await api<{ success?: boolean; admin?: { nome?: string; email?: string } }>('/api/admin/profile');
+      const data = await api<{ success?: boolean; user?: { nome?: string; email?: string } }>('/api/me');
       if (data.success) {
         setAdminProfile({
-          nome: data.admin?.nome || '',
-          email: data.admin?.email || '',
+          nome: data.user?.nome || '',
+          email: data.user?.email || '',
         });
       }
     } catch (e) {
@@ -97,9 +97,9 @@ export default function AdminScreen() {
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
     try {
-      const result = await api<{ success?: boolean; message?: string }>(`/api/admin/users/${encodeURIComponent(selectedUser.id)}`, {
-        method: 'PUT',
-        body: JSON.stringify(selectedUser),
+      const result = await api<{ success?: boolean; message?: string }>(`/api/v1/admin/users/${encodeURIComponent(selectedUser.id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role: selectedUser.role }),
       });
       Alert.alert(result.message || 'Usuario atualizado.');
       if (result.success) {
@@ -114,7 +114,7 @@ export default function AdminScreen() {
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     try {
-      const result = await api<{ success?: boolean; message?: string }>(`/api/admin/users/${encodeURIComponent(selectedUser.id)}`, { method: 'DELETE' });
+      const result = await api<{ success?: boolean; message?: string }>(`/api/v1/admin/users/${encodeURIComponent(selectedUser.id)}`, { method: 'DELETE' });
       Alert.alert(result.message || 'Usuario excluido.');
       if (result.success) {
         setEditModalVisible(false);
@@ -127,14 +127,9 @@ export default function AdminScreen() {
 
   const handleUpdateAdminProfile = async () => {
     try {
-      const data = {
-        nome: adminProfile.nome,
-        email: adminProfile.email,
-        senha: adminPassword,
-      };
-      const result = await api<{ success?: boolean; message?: string }>('/api/admin/profile', {
-        method: 'PUT',
-        body: JSON.stringify(data),
+      const result = await api<{ success?: boolean; message?: string }>('/api/v1/profile/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ nome: adminProfile.nome }),
       });
       Alert.alert(result.message || 'Perfil atualizado.');
     } catch (err) {

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api, ApiError } from '../../lib/api';
 import {
   StyleSheet,
   View,
@@ -32,7 +33,7 @@ export default function MedicoScreen() {
   const [profileBio, setProfileBio] = useState('Especialista em Terapia Cognitivo-Comportamental focada em transtornos de ansiedade, depressão e burnout.');
 
   // Dados estáticos mapeados
-  const appointments = [
+  const [appointments, setAppointments] = useState<any[]>([
     {
       id: '1',
       patient: 'João da Silva',
@@ -53,7 +54,37 @@ export default function MedicoScreen() {
       history: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória. Encaminhada por neurologista.',
       preview: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória...',
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [profile, , appointmentData] = await Promise.all([
+          api<{ success: boolean; profile: any }>('/api/v1/profile/me'),
+          api<{ success: boolean; stats: any }>('/api/v1/doctor/dashboard'),
+          api<{ success: boolean; appointments: any[] }>('/api/v1/doctor/appointments'),
+        ]);
+        setProfileName(profile.profile?.nome || '');
+        setCouncilNumber(profile.profile?.registro || '');
+        setHourlyRate(String(profile.profile?.valor_hora ?? ''));
+        setProfileBio(profile.profile?.descricao || '');
+        setAppointments(appointmentData.appointments.map((item) => ({
+          id: item.id,
+          patient: item.paciente_nome,
+          type: 'Consulta',
+          date: new Date(item.data_hora).toLocaleString('pt-BR'),
+          price: `R$ ${Number(item.valor).toFixed(2)}`,
+          img: avatar,
+          history: item.anotacoes || 'Sem histórico registrado.',
+          preview: item.anotacoes || 'Consulta agendada.',
+          status: item.status,
+        })));
+      } catch (error) {
+        if (error instanceof ApiError) Alert.alert('Erro', error.message);
+      }
+    };
+    load();
+  }, []);
 
   const patientsList = [
     {
@@ -217,7 +248,25 @@ export default function MedicoScreen() {
                   />
                 </View>
 
-                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Perfil atualizado com sucesso!')}>
+                <TouchableOpacity
+                  style={styles.saveSettingsBtn}
+                  onPress={async () => {
+                    try {
+                      await api('/api/v1/profile/me', {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                          nome: profileName,
+                          registro: councilNumber,
+                          valor_hora: Number(hourlyRate.replace(',', '.')),
+                          descricao: profileBio,
+                        }),
+                      });
+                      Alert.alert('Perfil atualizado com sucesso!');
+                    } catch (error) {
+                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                    }
+                  }}
+                >
                   <Text style={styles.btnText}>Salvar Perfil Profissional</Text>
                 </TouchableOpacity>
               </View>
@@ -246,7 +295,17 @@ export default function MedicoScreen() {
                   <Text style={styles.label}>Telefone / WhatsApp</Text>
                   <TextInput style={styles.input} defaultValue="(11) 99999-8888" />
                 </View>
-                <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Configurações salvas!')}>
+                <TouchableOpacity
+                  style={styles.saveSettingsBtn}
+                  onPress={async () => {
+                    try {
+                      await api('/api/v1/profile/me', { method: 'PATCH', body: JSON.stringify({ telefone: '(11) 99999-8888' }) });
+                      Alert.alert('Configurações salvas!');
+                    } catch (error) {
+                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                    }
+                  }}
+                >
                   <Text style={styles.btnText}>Salvar Configurações</Text>
                 </TouchableOpacity>
               </View>
@@ -294,12 +353,37 @@ export default function MedicoScreen() {
 
                 <TouchableOpacity 
                   style={[styles.saveSettingsBtn, { marginTop: 12 }]} 
-                  onPress={() => {
-                    Alert.alert('Anotações salvas com sucesso!');
-                    setSelectedAppointment(null);
+                  onPress={async () => {
+                    try {
+                      await api(`/api/v1/appointments/${selectedAppointment.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ anotacoes: doctorNotes }),
+                      });
+                      Alert.alert('Anotações salvas com sucesso!');
+                      setSelectedAppointment(null);
+                    } catch (error) {
+                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                    }
                   }}
                 >
                   <Text style={styles.btnText}>Salvar no Prontuário</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.saveSettingsBtn, { marginTop: 8 }]}
+                  onPress={async () => {
+                    try {
+                      await api(`/api/v1/appointments/${selectedAppointment.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ status: 'concluida', anotacoes: doctorNotes }),
+                      });
+                      Alert.alert('Consulta concluída!');
+                      setSelectedAppointment(null);
+                    } catch (error) {
+                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel concluir.');
+                    }
+                  }}
+                >
+                  <Text style={styles.btnText}>Concluir Consulta</Text>
                 </TouchableOpacity>
               </ScrollView>
             )}

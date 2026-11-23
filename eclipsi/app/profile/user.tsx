@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api, ApiError } from '../../lib/api';
 import {
   StyleSheet,
   Text,
@@ -10,12 +11,9 @@ import {
   Modal,
   StatusBar,
   Alert,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-
-const { width } = Dimensions.get('window');
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const avatar = require('../../assets/images/avatar.png');
 
@@ -27,24 +25,19 @@ export default function UserScreen() {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-  const [doctorModalVisible, setDoctorModalVisible] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
-
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [ratingDoctorName, setRatingDoctorName] = useState('');
   const [ratingValue, setRatingValue] = useState(0);
   const [ratingComment, setRatingComment] = useState('');
+  const [ratingAppointmentId, setRatingAppointmentId] = useState<number | null>(null);
 
   // Estados do Perfil e Configurações
   const [profileName, setProfileName] = useState('João da Silva');
   const [profileBio, setProfileBio] = useState('Buscando autoconhecimento e uma rotina mais saudável.');
   const [userEmail, setUserEmail] = useState('joao.silva@email.com');
   const [userPhone, setUserPhone] = useState('(11) 98765-4321');
-  const [notifEmail, setNotifEmail] = useState(true);
-  const [notifSms, setNotifSms] = useState(false);
-
   // Dados Mockados para Consultas e Médicos
-  const upcomingAppointments = [
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([
     {
       id: '1',
       doctor: 'Dra. Mariana Costa',
@@ -54,9 +47,9 @@ export default function UserScreen() {
       img: avatar,
       status: 'Agendada',
     },
-  ];
+  ]);
 
-  const completedAppointments = [
+  const [completedAppointments, setCompletedAppointments] = useState<any[]>([
     {
       id: '2',
       doctor: 'Dra. Ana Silva',
@@ -75,9 +68,9 @@ export default function UserScreen() {
       img: avatar,
       feedback: 'Manutenção da medicação atual por mais 30 dias. Encaminhamento enviado para acompanhamento conjunto com neuropsicólogo.',
     },
-  ];
+  ]);
 
-  const doctorsList = [
+  const [doctorsList, setDoctorsList] = useState<any[]>([
     {
       id: 'd1',
       name: 'Dra. Camila Ribeiro',
@@ -96,7 +89,58 @@ export default function UserScreen() {
       img: avatar,
       bio: 'Atendimento psiquiátrico humanizado e focado em diagnóstico preciso.',
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [profile, doctors, appointments] = await Promise.all([
+          api<{ success: boolean; profile: any }>('/api/v1/profile/me'),
+          api<{ success: boolean; doctors: any[] }>('/api/v1/doctors'),
+          api<{ success: boolean; appointments: any[] }>('/api/v1/appointments'),
+        ]);
+        setProfileName(profile.profile?.nome || '');
+        setProfileBio(profile.profile?.descricao || '');
+        setUserEmail(profile.profile?.email || '');
+        setUserPhone(profile.profile?.telefone || '');
+        setDoctorsList(doctors.doctors.map((doctor) => ({
+          id: doctor.id,
+          name: doctor.nome,
+          profession: `${doctor.especialidade || 'Profissional'}${doctor.registro ? ` - ${doctor.registro}` : ''}`,
+          rating: 'Disponível',
+          price: `R$ ${Number(doctor.valor_hora || 0).toFixed(2)} / hora`,
+          img: avatar,
+          bio: doctor.descricao || 'Profissional em saúde mental.',
+        })));
+        setUpcomingAppointments(appointments.appointments
+          .filter((item) => item.status === 'agendada')
+          .map((item) => ({
+            id: item.id,
+            doctor: item.medico_nome,
+            specialty: item.especialidade,
+            date: new Date(item.data_hora).toLocaleString('pt-BR'),
+            price: `R$ ${Number(item.valor).toFixed(2)}`,
+            img: avatar,
+            status: item.status,
+            annotation: item.anotacoes,
+          })));
+        setCompletedAppointments(appointments.appointments
+          .filter((item) => ['concluida', 'realizada'].includes(item.status))
+          .map((item) => ({
+            id: item.id,
+            doctor: item.medico_nome,
+            specialty: item.especialidade,
+            date: new Date(item.data_hora).toLocaleString('pt-BR'),
+            price: `R$ ${Number(item.valor).toFixed(2)}`,
+            img: avatar,
+            feedback: item.anotacoes,
+          })));
+      } catch (error) {
+        if (error instanceof ApiError) Alert.alert('Erro', error.message);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -192,6 +236,7 @@ export default function UserScreen() {
                         onPress={(e) => {
                           e.stopPropagation();
                           setRatingDoctorName(item.doctor);
+                          setRatingAppointmentId(Number(item.id));
                           setRatingModalVisible(true);
                         }}
                       >
@@ -213,10 +258,6 @@ export default function UserScreen() {
               <TouchableOpacity
                 key={doc.id}
                 style={styles.doctorCard}
-                onPress={() => {
-                  setSelectedDoctor(doc);
-                  setDoctorModalVisible(true);
-                }}
               >
                 <Image source={doc.img} style={styles.cardImg} />
                 <View style={styles.cardInfo}>
@@ -225,8 +266,27 @@ export default function UserScreen() {
                   <Text style={styles.cardRating}>⭐ {doc.rating}</Text>
                   <Text style={styles.cardPrice}>💰 {doc.price}</Text>
                   <Text style={styles.cardPreview} numberOfLines={2}>{doc.bio}</Text>
-                  <TouchableOpacity style={styles.viewDoctorBtn}>
-                    <Text style={styles.viewDoctorBtnText}>Ver perfil completo</Text>
+                  <TouchableOpacity
+                    style={styles.viewDoctorBtn}
+                    onPress={async () => {
+                      const date = new Date();
+                      date.setDate(date.getDate() + 1);
+                      date.setHours(14, 0, 0, 0);
+                      try {
+                        await api('/api/v1/appointments', {
+                          method: 'POST',
+                          body: JSON.stringify({
+                            medico_id: Number(doc.id),
+                            data_hora: date.toISOString(),
+                          }),
+                        });
+                        Alert.alert('Consulta agendada!', date.toLocaleString('pt-BR'));
+                      } catch (error) {
+                        Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel agendar.');
+                      }
+                    }}
+                  >
+                    <Text style={styles.viewDoctorBtnText}>Agendar amanhã às 14h</Text>
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
@@ -275,7 +335,20 @@ export default function UserScreen() {
                 />
               </View>
 
-              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Perfil salvo com sucesso!')}>
+              <TouchableOpacity
+                style={styles.saveSettingsBtn}
+                onPress={async () => {
+                  try {
+                    await api('/api/v1/profile/me', {
+                      method: 'PATCH',
+                      body: JSON.stringify({ nome: profileName, descricao: profileBio }),
+                    });
+                    Alert.alert('Perfil salvo com sucesso!');
+                  } catch (error) {
+                    Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                  }
+                }}
+              >
                 <Text style={styles.saveSettingsBtnText}>Salvar Perfil</Text>
               </TouchableOpacity>
             </View>
@@ -303,7 +376,20 @@ export default function UserScreen() {
                 <TextInput style={styles.input} value={userPhone} onChangeText={setUserPhone} />
               </View>
 
-              <TouchableOpacity style={styles.saveSettingsBtn} onPress={() => Alert.alert('Configurações salvas!')}>
+              <TouchableOpacity
+                style={styles.saveSettingsBtn}
+                onPress={async () => {
+                  try {
+                    await api('/api/v1/profile/me', {
+                      method: 'PATCH',
+                      body: JSON.stringify({ telefone: userPhone }),
+                    });
+                    Alert.alert('Configurações salvas!');
+                  } catch (error) {
+                    Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                  }
+                }}
+              >
                 <Text style={styles.saveSettingsBtnText}>Salvar Configurações</Text>
               </TouchableOpacity>
             </View>
@@ -377,6 +463,13 @@ export default function UserScreen() {
             </TouchableOpacity>
             <Text style={styles.pageTitle}>Avaliar Atendimento</Text>
             <Text style={styles.specialty}>{ratingDoctorName}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 12 }}>
+              {[1, 2, 3, 4, 5].map((value) => (
+                <TouchableOpacity key={value} onPress={() => setRatingValue(value)}>
+                  <Text style={{ fontSize: 24 }}>{value <= ratingValue ? '⭐' : '☆'}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.formGroup}>
               <Text style={styles.label}>Comentário (opcional):</Text>
               <TextInput
@@ -389,9 +482,25 @@ export default function UserScreen() {
             </View>
             <TouchableOpacity
               style={styles.saveSettingsBtn}
-              onPress={() => {
-                Alert.alert('Avaliação enviada com sucesso!');
-                setRatingModalVisible(false);
+              onPress={async () => {
+                if (!ratingAppointmentId || ratingValue < 1) {
+                  Alert.alert('Atenção', 'Selecione uma nota de 1 a 5.');
+                  return;
+                }
+                try {
+                  await api('/api/v1/reviews', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      appointment_id: ratingAppointmentId,
+                      nota: ratingValue,
+                      comentario: ratingComment,
+                    }),
+                  });
+                  Alert.alert('Avaliação enviada com sucesso!');
+                  setRatingModalVisible(false);
+                } catch (error) {
+                  Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel avaliar.');
+                }
               }}
             >
               <Text style={styles.saveSettingsBtnText}>Enviar Avaliação</Text>

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { api, ApiError } from "../../lib/api";
+import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
     Alert,
     Image,
@@ -44,8 +44,8 @@ export default function CadastroUserScreen() {
     };
 
     try {
-      const data = await api<{ success?: boolean; message?: string }>(
-        "/api/register/user",
+      const data = await api<{ success?: boolean; message?: string; token?: string; access_token?: string }>(
+        "/api/v1/auth/register/user",
         {
           method: "POST",
           body: JSON.stringify(payload),
@@ -53,6 +53,8 @@ export default function CadastroUserScreen() {
       );
 
       if (data.success !== false) {
+        const token = data.token ?? data.access_token;
+        if (token) await setAuthToken(token);
         Alert.alert("Aviso", data.message || "Cadastro realizado com sucesso!");
         router.replace("/auth/login");
       } else {
