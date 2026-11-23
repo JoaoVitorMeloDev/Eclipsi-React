@@ -545,6 +545,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: palette.indigo,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -552,10 +554,12 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flexDirection: 'row',
+    maxWidth: '100%',
     alignItems: 'center',
   },
   headerRight: {
     flexDirection: 'row',
+    marginLeft: 'auto',
     alignItems: 'center',
     gap: 12,
   },
@@ -574,7 +578,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     fontSize: 14,
-    color: '#333333',
+    color: palette.indigo,
     width: 140,
   },
   profileImg: {
@@ -589,12 +593,12 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333333',
+    color: palette.indigo,
     marginBottom: 4,
   },
   pageSubtitle: {
     fontSize: 14,
-    color: '#666666',
+    color: palette.muted,
     marginBottom: 16,
   },
   cardsGrid: {
@@ -605,7 +609,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -616,7 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -635,18 +639,18 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
+    color: palette.indigo,
     marginBottom: 4,
   },
   specialty: {
     fontSize: 12,
-    color: '#666666',
+    color: palette.muted,
     fontStyle: 'italic',
     marginBottom: 6,
   },
   cardDate: {
     fontSize: 13,
-    color: '#444444',
+    color: palette.muted,
     marginBottom: 2,
   },
   cardPrice: {
@@ -657,7 +661,7 @@ const styles = StyleSheet.create({
   },
   cardPreview: {
     fontSize: 12,
-    color: '#666666',
+    color: palette.muted,
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -736,7 +740,7 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.indigo,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -752,17 +756,17 @@ const styles = StyleSheet.create({
   modalPatientName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.indigo,
   },
   modalSubHeader: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.indigo,
     marginTop: 12,
     marginBottom: 4,
   },
   feedbackTextContainer: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: palette.neutral,
     padding: 10,
     borderRadius: 8,
     borderLeftWidth: 4,
@@ -770,7 +774,7 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 13,
-    color: '#333',
+    color: palette.indigo,
   },
   profileHeaderContainer: {
     flexDirection: 'row',
@@ -823,7 +827,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderLeftWidth: 4,
     borderLeftColor: palette.indigo,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     elevation: 2,
@@ -835,7 +839,7 @@ const styles = StyleSheet.create({
   earningsLabel: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#666',
+    color: palette.muted,
     marginBottom: 4,
   },
   earningsLabelHighlight: {
@@ -866,7 +870,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     elevation: 2,
@@ -875,7 +879,7 @@ const styles = StyleSheet.create({
   sectionSubTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.indigo,
     marginBottom: 4,
   },
   formGroup: {
@@ -884,7 +888,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#444',
+    color: palette.muted,
   },
   input: {
     borderWidth: 1,
@@ -920,7 +924,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   consultationHistoryCard: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: palette.neutral,
     borderLeftWidth: 4,
     borderLeftColor: palette.indigo,
     padding: 10,
@@ -940,11 +944,11 @@ const styles = StyleSheet.create({
   },
   consultationHistoryDate: {
     fontSize: 11,
-    color: '#666',
+    color: palette.muted,
   },
   consultationHistoryNotes: {
     fontSize: 12,
-    color: '#333',
+    color: palette.indigo,
   },
   loadingContainer: {
     minHeight: 220,
@@ -953,7 +957,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    color: '#475569',
+    color: palette.muted,
     fontSize: 14,
   },
   profileFeedback: {

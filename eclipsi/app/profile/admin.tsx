@@ -196,7 +196,7 @@ function AdminScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar usuários..."
-            placeholderTextColor="#666"
+            placeholderTextColor={palette.muted}
             maxLength={100}
             onChangeText={(text) => {
               setSearchQuery(text);
@@ -390,7 +390,7 @@ function AdminScreen() {
                     ? stats.especialidades
                     : Object.entries(stats.especialidades || {}).map(([especialidade, total]) => ({ especialidade, total }));
                   return especialidades.length === 0 ? (
-                  <Text style={{ color: '#666' }}>Nenhum profissional cadastrado por enquanto.</Text>
+                  <Text style={{ color: palette.muted }}>Nenhum profissional cadastrado por enquanto.</Text>
                   ) : especialidades.map((item: any, idx: number) => {
                     const esp = String(item.especialidade || item.nome || 'Não informada');
                     const count = Number(item.total ?? item.count ?? 0);
@@ -577,6 +577,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: palette.indigo,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
@@ -585,11 +587,13 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flexDirection: 'row',
+    maxWidth: '100%',
     alignItems: 'center',
     gap: 16,
   },
   headerRight: {
     flexDirection: 'row',
+    marginLeft: 'auto',
     alignItems: 'center',
     gap: 16,
   },
@@ -633,7 +637,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     fontSize: 14,
-    color: '#333333',
+    color: palette.indigo,
     width: 140,
   },
   sidebarOverlay: {
@@ -654,7 +658,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     zIndex: 100,
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -691,7 +695,7 @@ const styles = StyleSheet.create({
   },
   navItemText: {
     fontSize: 16,
-    color: '#333333',
+    color: palette.indigo,
   },
   navItemTextActive: {
     color: palette.white,
@@ -720,7 +724,7 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     fontSize: 14,
-    color: '#666666',
+    color: palette.muted,
     marginBottom: 16,
   },
   subSearchInput: {
@@ -738,7 +742,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     borderRadius: 12,
     padding: 12,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -767,7 +771,7 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 13,
-    color: '#333333',
+    color: palette.indigo,
   },
   badge: {
     paddingVertical: 4,
@@ -777,11 +781,11 @@ const styles = StyleSheet.create({
   },
   badgeAdmin: { backgroundColor: palette.salmon },
   badgeMed: { backgroundColor: palette.cream },
-  badgePac: { backgroundColor: '#F1F5F9' },
+  badgePac: { backgroundColor: palette.neutral },
   badgeText: { fontSize: 11, fontWeight: 'bold' },
   badgeTextAdmin: { color: palette.indigo },
   badgeTextMed: { color: palette.indigo },
-  badgeTextPac: { color: '#334155' },
+  badgeTextPac: { color: palette.muted },
   btnEditUser: {
     backgroundColor: palette.indigo,
     paddingVertical: 6,
@@ -812,7 +816,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderLeftWidth: 4,
     borderLeftColor: palette.indigo,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -825,7 +829,7 @@ const styles = StyleSheet.create({
   earningsLabel: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#666666',
+    color: palette.muted,
     marginBottom: 6,
   },
   highlightText: { color: palette.salmon },
@@ -851,14 +855,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 4,
     borderTopColor: palette.indigo,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
   categoryCardTitle: {
-    color: '#555',
+    color: palette.muted,
     fontSize: 13,
     marginBottom: 8,
   },
@@ -869,7 +873,7 @@ const styles = StyleSheet.create({
   },
   categoryCardSub: {
     fontSize: 11,
-    color: '#666',
+    color: palette.muted,
     marginTop: 4,
   },
   settingsForm: {
@@ -880,7 +884,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     gap: 16,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -914,7 +918,7 @@ const styles = StyleSheet.create({
   formLabel: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#444',
+    color: palette.muted,
   },
   formInput: {
     borderWidth: 1,
@@ -924,7 +928,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 14,
     backgroundColor: palette.white,
-    color: '#333',
+    color: palette.indigo,
   },
   saveSettingsBtn: {
     backgroundColor: palette.magenta,
@@ -980,7 +984,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     borderRadius: 12,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -994,16 +998,16 @@ const styles = StyleSheet.create({
   },
   modalCloseText: {
     fontSize: 24,
-    color: '#333',
+    color: palette.indigo,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: palette.indigo,
   },
   modalSub: {
     fontSize: 12,
-    color: '#666',
+    color: palette.muted,
     marginTop: 2,
   },
   btnDeleteUser: {

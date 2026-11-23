@@ -1,3 +1,4 @@
+import { AcademicDemoNotice } from '../AcademicDemoNotice';
 import { useEffect, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import { ActivityIndicator, Image, Platform, Text, View } from 'react-native';
@@ -81,7 +82,7 @@ export function PixModal({ appointmentId, onClose, onPaid }: {
       {payment && payment.status !== 'pago' && (
         <>
           {payment.mode === 'sandbox_mock' && (
-            <Text style={styles.status}>Modo demonstração. Nenhum valor será cobrado.</Text>
+            <AcademicDemoNotice payment />
           )}
           {payment.qr_code_base64 ? (
             <Image source={{ uri: `data:image/png;base64,${payment.qr_code_base64}` }}

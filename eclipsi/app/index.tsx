@@ -1,3 +1,4 @@
+import { AcademicDemoNotice } from '../components/AcademicDemoNotice';
 import { withRouteGuard } from '../components/RouteGuard';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useRouter } from 'expo-router';
@@ -37,6 +38,7 @@ function WelcomeScreen() {
           >
             <Text style={styles.buttonText}>Fazer um cadastro</Text>
           </PrimaryButton>
+          <AcademicDemoNotice />
         </View>
       </View>
     </ScrollView>

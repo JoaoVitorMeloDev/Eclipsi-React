@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     fontSize: 14,
-    color: '#666666',
+    color: palette.muted,
     marginBottom: 16,
   },
   homeSection: {
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   },
   specialty: {
     fontSize: 13,
-    color: '#666666',
+    color: palette.muted,
     fontStyle: 'italic',
     marginBottom: 4,
   },
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   },
   cardPreview: {
     fontSize: 12,
-    color: '#666666',
+    color: palette.muted,
     marginBottom: 8,
   },
   cardRating: {
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   },
   modalCloseText: {
     fontSize: 24,
-    color: '#666666',
+    color: palette.muted,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   feedbackBox: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: palette.neutral,
     padding: 10,
     borderRadius: 8,
     borderLeftWidth: 4,
@@ -893,12 +893,12 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 13,
-    color: '#333333',
+    color: palette.indigo,
     lineHeight: 18,
   },
   normalText: {
     fontWeight: 'normal',
-    color: '#333333',
+    color: palette.indigo,
   },
   profileHeaderContainer: {
     flexDirection: 'row',
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -961,7 +961,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#444444',
+    color: palette.muted,
   },
   input: {
     borderWidth: 1,
@@ -1020,7 +1020,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    color: '#475569',
+    color: palette.muted,
     fontSize: 14,
   },
   profileFeedback: {
@@ -1046,7 +1046,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
     paddingTop: 32,
     paddingHorizontal: 16,
-    shadowColor: '#000',
+    shadowColor: palette.indigo,
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,

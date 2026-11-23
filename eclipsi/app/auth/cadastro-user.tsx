@@ -211,7 +211,7 @@ function CadastroUserScreen() {
                 <FormInput
                   accessibilityLabel="Confirme sua senha"
                   placeholder="Confirme sua senha"
-                  placeholderTextColor="#888"
+                  placeholderTextColor={palette.muted}
                   secureTextEntry
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
