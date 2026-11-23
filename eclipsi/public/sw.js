@@ -1,4 +1,4 @@
-const CACHE_NAME = "eclipsi-pwa-v1";
+const CACHE_NAME = "eclipsi-pwa-v2";
 const APP_SHELL = ["/", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -20,6 +20,8 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.pathname.startsWith("/api/")) return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request)),
+    event.request.mode === "navigate"
+      ? fetch(event.request).catch(() => caches.match(event.request))
+      : caches.match(event.request).then((cached) => cached || fetch(event.request)),
   );
 });

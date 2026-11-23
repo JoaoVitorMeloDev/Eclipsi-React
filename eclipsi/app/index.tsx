@@ -1,10 +1,11 @@
+import { withRouteGuard } from '../components/RouteGuard';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useRouter } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { palette } from '../lib/palette';
 
-export default function WelcomeScreen() {
+function WelcomeScreen() {
   const router = useRouter();
   const handleLogin = () => router.push('/auth/login');
   const handleRegister = () => router.push('/auth/cadastro');
@@ -41,6 +42,8 @@ export default function WelcomeScreen() {
     </ScrollView>
   );
 }
+
+export default withRouteGuard(WelcomeScreen);
 
 const styles = StyleSheet.create({
   screen: {

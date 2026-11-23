@@ -1,3 +1,4 @@
+import { observeBrowserSession } from '../lib/api';
 import { palette } from '../lib/palette';
 import { useEffect } from "react";
 import { Platform } from "react-native";
@@ -35,6 +36,7 @@ export default function RootLayout() {
         document.head.appendChild(theme);
       }
       theme.setAttribute("content", palette.indigo);
+      return observeBrowserSession();
     }
   }, []);
   return (

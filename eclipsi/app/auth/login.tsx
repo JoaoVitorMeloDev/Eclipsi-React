@@ -1,3 +1,5 @@
+import { getVerifiedRole, profileRoutes } from '../../lib/auth';
+import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
 import { palette } from '../../lib/palette';
@@ -14,7 +16,7 @@ import {
     View,
 } from "react-native";
 
-export default function LoginScreen() {
+function LoginScreen() {
   const router = useRouter();
   // Estados para capturar os inputs do formulário
   const [email, setEmail] = useState("");
@@ -55,7 +57,6 @@ export default function LoginScreen() {
         message?: string;
         token?: string;
         access_token?: string;
-        user?: { tipo?: string; role?: string };
       }>("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -65,15 +66,9 @@ export default function LoginScreen() {
         if (!token) {
           throw new ApiError("O servidor nao retornou o token.", 401);
         }
+        const role = await getVerifiedRole(token);
         await setAuthToken(token);
-        const session = await api<{
-          success?: boolean;
-          user?: { role?: string };
-        }>("/api/me");
-        const tipo = String(session.user?.role ?? data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
-        if (tipo === "admin") router.replace("/profile/admin");
-        else if (tipo === "medico" || tipo === "profissional" || tipo === "doctor") router.replace("/profile/medico");
-        else router.replace("/profile/user");
+        router.replace(profileRoutes[role]);
       } else {
         setFeedback(data.message || "E-mail ou senha incorretos.");
       }
@@ -181,6 +176,8 @@ export default function LoginScreen() {
     </View>
   );
 }
+
+export default withRouteGuard(LoginScreen);
 
 const styles = StyleSheet.create({
   mainContainer: {

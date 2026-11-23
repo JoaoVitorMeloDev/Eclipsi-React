@@ -1,3 +1,4 @@
+import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
 import { palette } from '../../lib/palette';
@@ -14,7 +15,7 @@ import {
     View,
 } from "react-native";
 
-export default function CadastroUserScreen() {
+function CadastroUserScreen() {
   const router = useRouter();
   // Estados para capturar os dados do formulário
   const [name, setName] = useState("");
@@ -266,6 +267,8 @@ export default function CadastroUserScreen() {
     </View>
   );
 }
+
+export default withRouteGuard(CadastroUserScreen);
 
 const styles = StyleSheet.create({
   containerMain: {

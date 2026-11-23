@@ -1,7 +1,7 @@
+import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useEffect, useState } from 'react';
-import { api, ApiError, clearAuthSession } from '../../lib/api';
-import { useRouter } from 'expo-router';
+import { api, ApiError } from '../../lib/api';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -21,8 +21,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const avatar = require('../../assets/images/avatar.png');
 
-export default function MedicoScreen() {
-  const router = useRouter();
+function MedicoScreen() {
+  const logout = useLogout();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState('');
@@ -345,7 +345,7 @@ export default function MedicoScreen() {
                 <Text style={styles.menuItemText}>{item.label}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity style={styles.menuItem} onPress={async () => { await clearAuthSession(); setMenuOpen(false); router.replace('/auth/login'); }}>
+            <TouchableOpacity style={styles.menuItem} onPress={logout}>
               <Text style={styles.menuItemText}>Sair</Text>
             </TouchableOpacity>
           </View>
@@ -517,6 +517,8 @@ export default function MedicoScreen() {
 }
 
 // Estilização adaptada para React Native (StyleSheet)
+export default withRouteGuard(MedicoScreen, 'medico');
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

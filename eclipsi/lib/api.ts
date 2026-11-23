@@ -7,16 +7,68 @@ export const API_URL = (
 
 export const AUTH_TOKEN_KEY = "eclipsi_auth_token";
 
+let sessionVersion = 0;
+let sessionWrite = Promise.resolve();
+let signedOut = false;
+let logoutVersion: number | undefined;
+const sessionListeners = new Set<() => void>();
+
+export function getSessionVersion(): number {
+  return sessionVersion;
+}
+
+function notifySessionChange() {
+  sessionVersion++;
+  sessionListeners.forEach((listener) => listener());
+}
+
+export function subscribeAuthSession(listener: () => void): () => void {
+  sessionListeners.add(listener);
+  return () => { sessionListeners.delete(listener); };
+}
+
 export async function getAuthToken(): Promise<string | null> {
-  return AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  await sessionWrite;
+  return signedOut ? null : AsyncStorage.getItem(AUTH_TOKEN_KEY);
 }
 
-export async function setAuthToken(token: string): Promise<void> {
-  await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+export function setAuthToken(token: string): Promise<void> {
+  const write = sessionWrite.then(async () => {
+    await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+    signedOut = false;
+    notifySessionChange();
+  });
+  sessionWrite = write.catch(() => undefined);
+  return write;
 }
 
-export async function clearAuthSession(): Promise<void> {
-  await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+export function isLocalLogout(version: number): boolean {
+  return version === logoutVersion;
+}
+
+export function clearAuthSession({ logout = false } = {}): Promise<void> {
+  if (logout) logoutVersion = sessionVersion + 1;
+  signedOut = true;
+  const write = sessionWrite.then(async () => {
+    signedOut = true;
+    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+  });
+  sessionWrite = write.catch(() => undefined);
+  setProfileAvatar(null);
+  notifySessionChange();
+  return write;
+}
+
+export function observeBrowserSession() {
+  const onStorage = (event: StorageEvent) => {
+    if (event.storageArea !== window.localStorage) return;
+    if (event.key !== AUTH_TOKEN_KEY && event.key !== null) return;
+    signedOut = event.newValue === null;
+    setProfileAvatar(null);
+    notifySessionChange();
+  };
+  window.addEventListener("storage", onStorage);
+  return () => window.removeEventListener("storage", onStorage);
 }
 
 let avatarListeners = new Set<(uri: string | null) => void>();
@@ -29,6 +81,7 @@ export function subscribeProfileAvatar(listener: (uri: string | null) => void): 
 }
 
 export function setProfileAvatar(uri: string | null): void {
+  if (signedOut && uri !== null) return;
   currentAvatar = uri;
   avatarListeners.forEach((listener) => listener(uri));
 }
@@ -78,16 +131,21 @@ export async function api<T = unknown>(
     throw new ApiError("O caminho da API deve comecar com '/'.", 0);
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
   const headers = new Headers(init?.headers);
   headers.set("Accept", "application/json");
-  const token = await getAuthToken();
+  const version = getSessionVersion();
+  const usesStoredSession = !headers.has("Authorization") && !path.startsWith("/api/v1/auth/");
+  const token = usesStoredSession ? await getAuthToken() : null;
+  if (version !== getSessionVersion() && usesStoredSession) {
+    throw new ApiError("Sua sessao mudou. Tente novamente.", 0);
+  }
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init?.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
     const response = await fetch(`${API_URL}${path}`, {
       ...init,
@@ -98,6 +156,10 @@ export async function api<T = unknown>(
     const text = await response.text();
     let data: unknown = null;
 
+    if (token && version !== getSessionVersion()) {
+      throw new ApiError("Sua sessao mudou. Tente novamente.", 0);
+    }
+
     if (text) {
       try {
         data = JSON.parse(text);
@@ -107,6 +169,9 @@ export async function api<T = unknown>(
     }
 
     if (!response.ok) {
+      if (response.status === 401 && token) {
+        void clearAuthSession().catch(() => undefined);
+      }
       throw new ApiError(getErrorMessage(data, response.status), response.status, data);
     }
 

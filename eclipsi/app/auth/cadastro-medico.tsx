@@ -1,3 +1,4 @@
+import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
 import { palette } from '../../lib/palette';
@@ -14,7 +15,7 @@ import {
     View,
 } from "react-native";
 
-export default function CadastroMedicoScreen() {
+function CadastroMedicoScreen() {
   const router = useRouter();
   // Estados para cada campo do formulário
   const [name, setName] = useState("");
@@ -309,6 +310,8 @@ export default function CadastroMedicoScreen() {
     </View>
   );
 }
+
+export default withRouteGuard(CadastroMedicoScreen);
 
 const styles = StyleSheet.create({
   screenContainer: {

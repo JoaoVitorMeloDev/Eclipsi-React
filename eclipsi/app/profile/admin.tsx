@@ -1,3 +1,4 @@
+import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useState, useEffect } from 'react';
 import { api, ApiError, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
@@ -19,7 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const avatar = require('../../assets/images/avatar.png');
 
-export default function AdminScreen() {
+function AdminScreen() {
+  const logout = useLogout();
   // Estados para navegação e controle de abas/sidebar
   const [activeTab, setActiveTab] = useState('usuarios');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,6 +177,7 @@ export default function AdminScreen() {
         <View style={[styles.headerLeft, { flexDirection: "row", alignItems: "center", gap: 10, flexShrink: 1 }]}>
           <TouchableOpacity
             style={[styles.burgerBtn, { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", padding: 0 }]}
+            accessibilityLabel="Abrir menu"
             onPress={() => setSidebarOpen(true)}
             activeOpacity={0.7}
           >
@@ -264,10 +267,7 @@ export default function AdminScreen() {
 
           <TouchableOpacity
             style={[styles.navItem, styles.logoutItem]}
-            onPress={() => {
-              setActiveTab('sair');
-              setSidebarOpen(false);
-            }}
+            onPress={logout}
           >
             <Text style={styles.logoutText}>Sair</Text>
           </TouchableOpacity>
@@ -470,14 +470,6 @@ export default function AdminScreen() {
             </View>
           </View>
         )}
-
-        {/* Aba 4: Sair */}
-        {activeTab === 'sair' && (
-          <View style={styles.pageContent}>
-            <Text style={styles.pageTitle}>Sessão Encerrada</Text>
-            <Text style={styles.pageSubtitle}>Você desconectou da conta do Administrador.</Text>
-          </View>
-        )}
       </ScrollView>
 
       {/* Navegação Inferior (Mobile Footer Navbar) */}
@@ -574,6 +566,8 @@ export default function AdminScreen() {
     </SafeAreaView>
   );
 }
+
+export default withRouteGuard(AdminScreen, 'admin');
 
 const styles = StyleSheet.create({
   safeArea: {

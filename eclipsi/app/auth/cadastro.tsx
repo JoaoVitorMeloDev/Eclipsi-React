@@ -1,3 +1,4 @@
+import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { palette } from '../../lib/palette';
 import { useRouter } from "expo-router";
@@ -10,7 +11,7 @@ import {
     View,
 } from "react-native";
 
-export default function CadastroEscolhaScreen() {
+function CadastroEscolhaScreen() {
   const router = useRouter();
   const handleMedChange = () => router.push("/auth/cadastro-medico");
   const handlePacChange = () => router.push("/auth/cadastro-user");
@@ -69,6 +70,8 @@ export default function CadastroEscolhaScreen() {
     </SafeAreaView>
   );
 }
+
+export default withRouteGuard(CadastroEscolhaScreen);
 
 const styles = StyleSheet.create({
   safeArea: {

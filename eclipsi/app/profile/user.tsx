@@ -1,7 +1,7 @@
+import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useEffect, useState } from 'react';
-import { api, ApiError, clearAuthSession, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
-import { useRouter } from 'expo-router';
+import { api, ApiError, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
 import * as ImagePicker from 'expo-image-picker';
 import {
   StyleSheet,
@@ -21,8 +21,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const avatar = require('../../assets/images/avatar.png');
 
-export default function UserScreen() {
-  const router = useRouter();
+function UserScreen() {
+  const logout = useLogout();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,7 +171,7 @@ export default function UserScreen() {
       {/* Header Superior Fixo */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.burgerBtn} onPress={() => setDrawerOpen(true)}>
+          <TouchableOpacity style={styles.burgerBtn} accessibilityLabel="Abrir menu" onPress={() => setDrawerOpen(true)}>
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
@@ -580,11 +580,7 @@ export default function UserScreen() {
             ))}
             <TouchableOpacity
               style={[styles.drawerItem, styles.drawerLogout]}
-              onPress={async () => {
-                await clearAuthSession();
-                setDrawerOpen(false);
-                router.replace('/auth/login');
-              }}
+              onPress={logout}
             >
               <Text style={styles.drawerItemText}>Sair</Text>
             </TouchableOpacity>
@@ -708,6 +704,8 @@ export default function UserScreen() {
 }
 
 // Estilização adaptada para StyleSheet do React Native
+export default withRouteGuard(UserScreen, 'paciente');
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
