@@ -76,8 +76,8 @@ export default function CadastroMedicoScreen() {
   return (
     <View style={styles.screenContainer}>
       {/* Fundos decorativos */}
-      <View style={styles.backgroundTop} />
-      <View style={styles.backgroundBottom} />
+      <View pointerEvents="none" style={styles.backgroundTop} />
+      <View pointerEvents="none" style={styles.backgroundBottom} />
 
       <ScrollView
         style={styles.scrollView}
@@ -255,6 +255,7 @@ export default function CadastroMedicoScreen() {
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
+    minHeight: "100%",
     backgroundColor: "#322c8e",
   },
   backgroundTop: {
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "50%",
     backgroundColor: "#ffeec2",
-    zIndex: 1,
+    zIndex: 0,
   },
   backgroundBottom: {
     position: "absolute",
@@ -275,22 +276,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#322c8e",
     borderTopLeftRadius: 150,
     borderTopRightRadius: 150,
-    zIndex: 1,
+    zIndex: 0,
   },
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    minHeight: "100%",
     paddingTop: 24,
     paddingBottom: 48,
-    zIndex: 2,
+    zIndex: 10,
   },
   scrollView: {
     flex: 1,
     width: "100%",
+    position: "relative",
+    zIndex: 10,
   },
   container: {
     position: "relative",
+    zIndex: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    padding: 24,
     alignItems: "center",
     justifyContent: "center",
     width: "90%",

@@ -83,10 +83,10 @@ export default function LoginScreen() {
   return (
     <View style={styles.mainContainer}>
       {/* Fundo superior (cor clara) */}
-      <View style={styles.backgroundTop} />
+      <View pointerEvents="none" style={styles.backgroundTop} />
 
       {/* Fundo inferior com curva (cor escura) */}
-      <View style={styles.backgroundBottom} />
+      <View pointerEvents="none" style={styles.backgroundBottom} />
 
       <ScrollView
         style={styles.scrollView}
@@ -168,6 +168,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+    minHeight: "100%",
     backgroundColor: "#322c8e",
     alignItems: "center",
     justifyContent: "center",
@@ -175,12 +176,14 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     width: "100%",
+    position: "relative",
+    zIndex: 10,
   },
   scrollContainer: {
     flexGrow: 1,
     minHeight: "100%",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     paddingTop: 24,
     paddingBottom: 48,
   },
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "50%",
     backgroundColor: "#ffeec2",
-    zIndex: 1,
+    zIndex: 0,
   },
   backgroundBottom: {
     position: "absolute",
@@ -202,11 +205,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#322c8e",
     borderTopLeftRadius: 150, // Adaptação nativa da curva CSS
     borderTopRightRadius: 150,
-    zIndex: 1,
+    zIndex: 0,
   },
   container: {
     position: "relative",
-    zIndex: 2,
+    zIndex: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    padding: 24,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",

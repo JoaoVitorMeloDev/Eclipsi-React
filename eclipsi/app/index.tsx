@@ -18,10 +18,10 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.screenContainer}>
       {/* Fundo superior (cor clara) */}
-      <View style={styles.backgroundTop} />
+      <View pointerEvents="none" style={styles.backgroundTop} />
 
       {/* Fundo inferior com a cor escura */}
-      <View style={styles.backgroundBottom} />
+      <View pointerEvents="none" style={styles.backgroundBottom} />
 
       <View style={styles.container}>
         {/* Bloco do Logotipo e Título */}
@@ -68,6 +68,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
+    minHeight: "100%",
     backgroundColor: "#322c8e",
     alignItems: "center",
     justifyContent: "center",
@@ -79,7 +80,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "50%",
     backgroundColor: "#ffeec2",
-    zIndex: 1,
+    zIndex: 0,
+    pointerEvents: "none",
   },
   backgroundBottom: {
     position: "absolute",
@@ -90,11 +92,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#322c8e",
     borderTopLeftRadius: 80,
     borderTopRightRadius: 80,
-    zIndex: 1,
+    zIndex: 0,
+    pointerEvents: "none",
   },
   container: {
     position: "relative",
-    zIndex: 2,
+    zIndex: 10,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",

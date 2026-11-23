@@ -21,10 +21,10 @@ export default function CadastroEscolhaScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Fundo superior (cor clara) */}
-      <View style={styles.backgroundTop} />
+      <View pointerEvents="none" style={styles.backgroundTop} />
 
       {/* Fundo inferior com a curva (cor escura) */}
-      <View style={styles.backgroundBottom} />
+      <View pointerEvents="none" style={styles.backgroundBottom} />
 
       <View style={styles.container}>
         <View style={styles.logoTitleContainer}>
@@ -76,6 +76,7 @@ export default function CadastroEscolhaScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    minHeight: "100%",
     backgroundColor: "#322c8e",
     alignItems: "center",
     justifyContent: "center",
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "50%",
     backgroundColor: "#ffeec2",
-    zIndex: 1,
+    zIndex: 0,
   },
   backgroundBottom: {
     position: "absolute",
@@ -98,11 +99,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#322c8e",
     borderTopLeftRadius: width * 0.5,
     borderTopRightRadius: width * 0.5,
-    zIndex: 1,
+    zIndex: 0,
   },
   container: {
     position: "relative",
-    zIndex: 2,
+    zIndex: 10,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

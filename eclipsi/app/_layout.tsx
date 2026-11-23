@@ -10,11 +10,13 @@ export default function RootLayout() {
       document.documentElement.style.overflow = "auto";
       document.body.style.height = "100%";
       document.body.style.minHeight = "100%";
+      document.body.style.margin = "0";
       document.body.style.overflow = "auto";
       const root = document.getElementById("root");
       if (root) {
-        root.style.minHeight = "100%";
-        root.style.height = "100%";
+        root.style.minHeight = "100vh";
+        root.style.height = "auto";
+        root.style.overflow = "visible";
       }
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/sw.js").catch(() => undefined);
