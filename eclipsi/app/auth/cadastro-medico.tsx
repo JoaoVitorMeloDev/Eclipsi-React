@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
     Alert,
+    ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
@@ -24,17 +25,25 @@ export default function CadastroMedicoScreen() {
   const [description, setDescription] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ text: string; type: "error" | "success" } | null>(null);
 
   // Lógica de envio do formulário adaptada do api.js
   const handleSubmit = async () => {
+    setFeedback(null);
     if (!name.trim() || !email.trim() || !councilNumber.trim() || !password) {
-      Alert.alert("Atenção", "Preencha nome, e-mail, registro e senha.");
+      setFeedback({ text: "Preencha nome, e-mail, registro e senha.", type: "error" });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFeedback({ text: "Informe um e-mail profissional válido.", type: "error" });
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert("Erro", "As senhas não coincidem!");
+      setFeedback({ text: "As senhas não coincidem.", type: "error" });
       return;
     }
+    setLoading(true);
 
     const payload = {
       nome: name,
@@ -59,17 +68,18 @@ export default function CadastroMedicoScreen() {
       if (data.success !== false) {
         const token = data.token ?? data.access_token;
         if (token) await setAuthToken(token);
-        Alert.alert("Aviso", data.message || "Cadastro realizado com sucesso!");
+        setFeedback({ text: data.message || "Cadastro realizado com sucesso!", type: "success" });
         router.replace("/auth/login");
       } else {
-        Alert.alert("Erro", data.message || "Nao foi possivel realizar o cadastro.");
+        setFeedback({ text: data.message || "Nao foi possivel realizar o cadastro.", type: "error" });
       }
     } catch (error) {
-      console.error("Erro na requisição:", error);
-      Alert.alert(
-        "Erro",
-        error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.",
-      );
+      setFeedback({
+        text: error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,7 +118,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="Nome Completo"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   value={name}
                   onChangeText={setName}
                 />
@@ -119,7 +129,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="E-mail profissional"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={email}
@@ -132,7 +142,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="Telefone / WhatsApp (DD + número)"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={setPhone}
@@ -144,7 +154,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="Especialidade (Ex: Psiquiatra, Psicólogo)"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   value={specialty}
                   onChangeText={setSpecialty}
                 />
@@ -156,7 +166,7 @@ export default function CadastroMedicoScreen() {
                   <TextInput
                     style={styles.registerInput}
                     placeholder="Nº do Registro (CRM / CRP)"
-                    placeholderTextColor="#888"
+                    placeholderTextColor="#64748B"
                     value={councilNumber}
                     onChangeText={setCouncilNumber}
                   />
@@ -171,7 +181,7 @@ export default function CadastroMedicoScreen() {
                   <TextInput
                     style={styles.registerInput}
                     placeholder="UF"
-                    placeholderTextColor="#888"
+                    placeholderTextColor="#64748B"
                     autoCapitalize="characters"
                     maxLength={2}
                     value={councilUf}
@@ -185,7 +195,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={[styles.registerInput, styles.textArea]}
                   placeholder="Apresentação / Forma de trabalhar (opcional)"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   multiline={true}
                   numberOfLines={3}
                   value={description}
@@ -198,7 +208,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="Crie uma senha"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   secureTextEntry={true}
                   value={password}
                   onChangeText={setPassword}
@@ -210,7 +220,7 @@ export default function CadastroMedicoScreen() {
                 <TextInput
                   style={styles.registerInput}
                   placeholder="Confirme sua senha"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   secureTextEntry={true}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -219,13 +229,28 @@ export default function CadastroMedicoScreen() {
 
               {/* Botões e Link de Login */}
               <View style={styles.btnLine}>
+                {feedback ? (
+                  <Text
+                    accessibilityRole="alert"
+                    style={[styles.feedback, feedback.type === "success" ? styles.feedbackSuccess : styles.feedbackError]}
+                  >
+                    {feedback.text}
+                  </Text>
+                ) : null}
                 <TouchableOpacity
                   style={styles.registerBtn}
                   onPress={handleSubmit}
+                  disabled={loading}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.registerBtnText}>
-                    Cadastrar Profissional
-                  </Text>
+                  {loading ? (
+                    <View style={styles.loadingRow}>
+                      <ActivityIndicator color="#1d0027" />
+                      <Text style={styles.registerBtnText}>Cadastrando...</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.registerBtnText}>Cadastrar Profissional</Text>
+                  )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -296,14 +321,21 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     zIndex: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    backgroundColor: "#FFFFFF",
     padding: 24,
     alignItems: "center",
     justifyContent: "center",
     width: "90%",
     maxWidth: 500,
     gap: 20,
-    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 20,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   logoTitle: {
     alignItems: "center",
@@ -316,7 +348,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   title: {
-    color: "#ffffff",
+    color: "#0F172A",
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
@@ -363,9 +395,11 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 15,
     borderBottomWidth: 2,
-    borderBottomColor: "#ffffff",
-    backgroundColor: "#ffffff",
-    color: "#333333",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderBottomColor: "#CBD5E1",
+    backgroundColor: "#FFFFFF",
+    color: "#0F172A",
     fontSize: 14,
   },
   textArea: {
@@ -382,6 +416,27 @@ const styles = StyleSheet.create({
     borderBottomColor: "#7500a8",
     borderRadius: 15,
     backgroundColor: "#d196eb",
+  },
+  feedback: {
+    width: "100%",
+    borderRadius: 10,
+    padding: 10,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  feedbackError: {
+    color: "#991B1B",
+    backgroundColor: "#FEE2E2",
+  },
+  feedbackSuccess: {
+    color: "#166534",
+    backgroundColor: "#DCFCE7",
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   registerBtnText: {
     color: "#1d0027",

@@ -11,12 +11,14 @@ import {
   Modal,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const avatar = require('../../assets/images/avatar.png');
 
 export default function MedicoScreen() {
+  const [loading, setLoading] = useState(true);
   // Estados de navegação e modais
   const [activeTab, setActiveTab] = useState<'home' | 'pacientes' | 'perfil' | 'configuracoes'>('home');
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
@@ -27,34 +29,13 @@ export default function MedicoScreen() {
   const [doctorNotes, setDoctorNotes] = useState('');
   
   // Perfil Profissional (Mock state)
-  const [profileName, setProfileName] = useState('Dra. Ana Silva');
-  const [councilNumber, setCouncilNumber] = useState('CRP 06/123456');
-  const [hourlyRate, setHourlyRate] = useState('200,00');
-  const [profileBio, setProfileBio] = useState('Especialista em Terapia Cognitivo-Comportamental focada em transtornos de ansiedade, depressão e burnout.');
+  const [profileName, setProfileName] = useState('');
+  const [councilNumber, setCouncilNumber] = useState('');
+  const [hourlyRate, setHourlyRate] = useState('');
+  const [profileBio, setProfileBio] = useState('');
 
   // Dados estáticos mapeados
-  const [appointments, setAppointments] = useState<any[]>([
-    {
-      id: '1',
-      patient: 'João da Silva',
-      type: 'Sessão TCC / Primeira Consulta',
-      date: '30/09/2026 às 14:00',
-      price: 'R$ 200,00',
-      img: avatar,
-      history: 'Paciente relata episódios recorrentes de ansiedade no trabalho e sintomas de burnout. Histórico sem medicações prévias.',
-      preview: 'Paciente relata episódios recorrentes de ansiedade no trabalho e sintomas...',
-    },
-    {
-      id: '2',
-      patient: 'Maria Oliveira',
-      type: 'Avaliação Neuropsicológica',
-      date: '02/10/2026 às 10:00',
-      price: 'R$ 300,00',
-      img: avatar,
-      history: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória. Encaminhada por neurologista.',
-      preview: 'Sessão de aplicação de testes cognitivos para investigação de foco e memória...',
-    },
-  ]);
+  const [appointments, setAppointments] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -81,26 +62,14 @@ export default function MedicoScreen() {
         })));
       } catch (error) {
         if (error instanceof ApiError) Alert.alert('Erro', error.message);
+      } finally {
+        setLoading(false);
       }
     };
     load();
   }, []);
 
-  const patientsList = [
-    {
-      id: '1',
-      name: 'João da Silva',
-      profession: 'Última consulta: 15/09/2026',
-      rating: '5 Atendimentos realizados',
-      price: 'Plano: Individual',
-      img: avatar,
-      bio: 'Paciente em acompanhamento semanal. Evolução positiva no manejo de crises de ansiedade. Mantém diário de pensamentos.',
-      consultations: [
-        { date: '15/09/2026 - 14:00', type: 'Sessão TCC / Acompanhamento', notes: 'Paciente relatou melhora nos episódios de ansiedade após início do diário de pensamentos.' },
-        { date: '08/09/2026 - 14:00', type: 'Sessão TCC / Acompanhamento', notes: 'Identificados gatilhos de estresse no ambiente de trabalho.' }
-      ]
-    }
-  ];
+  const patientsList: any[] = [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -125,6 +94,13 @@ export default function MedicoScreen() {
 
       {/* Conteúdo Dinâmico Baseado na Aba Ativa */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#7500a8" />
+            <Text style={styles.loadingText}>Carregando dados...</Text>
+          </View>
+        ) : (
+          <>
         
         {/* ABA: MINHA AGENDA */}
         {activeTab === 'home' && (
@@ -312,7 +288,8 @@ export default function MedicoScreen() {
             </View>
           </View>
         )}
-
+          </>
+        )}
       </ScrollView>
 
       {/* Modal de Detalhes da Consulta / Prontuário */}
@@ -853,5 +830,15 @@ const styles = StyleSheet.create({
   consultationHistoryNotes: {
     fontSize: 12,
     color: '#333',
+  },
+  loadingContainer: {
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    color: '#475569',
+    fontSize: 14,
   },
 });

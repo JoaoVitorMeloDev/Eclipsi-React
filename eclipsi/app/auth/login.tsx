@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api, ApiError, setAuthToken } from "../../lib/api";
 import {
     Alert,
+    ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
@@ -17,6 +18,8 @@ export default function LoginScreen() {
   // Estados para capturar os inputs do formulário
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   // Função auxiliar para validar o formato do e-mail
   const validarEmail = (emailStr: string) => {
@@ -26,17 +29,19 @@ export default function LoginScreen() {
 
   // Lógica de submissão e autenticação adaptada do api.js e script.js
   const handleLogin = async () => {
+    setFeedback("");
     const trimmedEmail = email.trim();
 
     if (!validarEmail(trimmedEmail)) {
-      Alert.alert("Atenção", "Por favor, insira um e-mail válido.");
+      setFeedback("Por favor, insira um e-mail válido.");
       return;
     }
 
     if (!password) {
-      Alert.alert("Atenção", "Por favor, digite sua senha.");
+      setFeedback("Por favor, digite sua senha.");
       return;
     }
+    setLoading(true);
 
     const payload = {
       email: trimmedEmail,
@@ -69,14 +74,12 @@ export default function LoginScreen() {
         else if (tipo.includes("med") || tipo.includes("doctor")) router.replace("/profile/medico");
         else router.replace("/profile/user");
       } else {
-        Alert.alert("Erro", data.message || "E-mail ou senha incorretos.");
+        setFeedback(data.message || "E-mail ou senha incorretos.");
       }
     } catch (error) {
-      console.error("Erro na requisição de login:", error);
-      Alert.alert(
-        "Erro",
-        error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.",
-      );
+      setFeedback(error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,7 +116,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.registerInput}
                 placeholder="Digite seu e-mail"
-                placeholderTextColor="#999"
+                placeholderTextColor="#64748B"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -125,7 +128,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.registerInput}
                 placeholder="Digite sua senha"
-                placeholderTextColor="#999"
+                placeholderTextColor="#64748B"
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -133,11 +136,23 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.btnLine}>
+              {feedback ? (
+                <Text accessibilityRole="alert" style={styles.feedback}>{feedback}</Text>
+              ) : null}
               <TouchableOpacity
                 style={styles.registerBtn}
                 onPress={handleLogin}
+                disabled={loading}
+                activeOpacity={0.8}
               >
-                <Text style={styles.btnTextBold}>Entrar</Text>
+                {loading ? (
+                  <View style={styles.loadingRow}>
+                    <ActivityIndicator color="#1d0027" />
+                    <Text style={styles.btnTextBold}>Entrando...</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.btnTextBold}>Entrar</Text>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -210,7 +225,7 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     zIndex: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    backgroundColor: "#FFFFFF",
     padding: 24,
     alignItems: "center",
     justifyContent: "center",
@@ -219,6 +234,13 @@ const styles = StyleSheet.create({
     width: "90%",
     gap: 25,
     borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   logoTitle: {
     alignItems: "center",
@@ -237,7 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   title: {
-    color: "white",
+    color: "#0F172A",
     fontSize: 30,
     fontWeight: "bold",
   },
@@ -268,13 +290,12 @@ const styles = StyleSheet.create({
   registerInput: {
     padding: 12,
     width: "100%",
-    borderWidth: 0,
-    borderBottomWidth: 2,
-    borderBottomColor: "white",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
     borderRadius: 15,
     backgroundColor: "white",
     fontSize: 16,
-    color: "#333",
+    color: "#0F172A",
   },
   registerBtn: {
     alignItems: "center",
@@ -292,8 +313,23 @@ const styles = StyleSheet.create({
     color: "#1d0027",
     fontSize: 16,
   },
+  feedback: {
+    width: "100%",
+    borderRadius: 10,
+    padding: 10,
+    textAlign: "center",
+    color: "#991B1B",
+    backgroundColor: "#FEE2E2",
+    fontWeight: "600",
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
   registerP: {
-    color: "white",
+    color: "#334155",
     marginTop: 5,
   },
   registerLink: {

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { api, ApiError } from '../../lib/api';
+import { api, ApiError, clearAuthSession } from '../../lib/api';
+import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import {
   StyleSheet,
   Text,
@@ -11,6 +13,7 @@ import {
   Modal,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -18,6 +21,12 @@ import { FontAwesome5 } from '@expo/vector-icons';
 const avatar = require('../../assets/images/avatar.png');
 
 export default function UserScreen() {
+  const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profileFeedback, setProfileFeedback] = useState('');
   // Estados para navegação entre abas ('home', 'consultas', 'perfil', 'configuracoes')
   const [activeTab, setActiveTab] = useState<'home' | 'consultas' | 'perfil' | 'configuracoes'>('home');
 
@@ -32,64 +41,14 @@ export default function UserScreen() {
   const [ratingAppointmentId, setRatingAppointmentId] = useState<number | null>(null);
 
   // Estados do Perfil e Configurações
-  const [profileName, setProfileName] = useState('João da Silva');
-  const [profileBio, setProfileBio] = useState('Buscando autoconhecimento e uma rotina mais saudável.');
-  const [userEmail, setUserEmail] = useState('joao.silva@email.com');
-  const [userPhone, setUserPhone] = useState('(11) 98765-4321');
+  const [profileName, setProfileName] = useState('');
+  const [profileBio, setProfileBio] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState('');
   // Dados Mockados para Consultas e Médicos
-  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([
-    {
-      id: '1',
-      doctor: 'Dra. Mariana Costa',
-      specialty: 'Psicóloga',
-      date: '10/10/2026 às 14:00',
-      price: 'R$ 200,00',
-      img: avatar,
-      status: 'Agendada',
-    },
-  ]);
-
-  const [completedAppointments, setCompletedAppointments] = useState<any[]>([
-    {
-      id: '2',
-      doctor: 'Dra. Ana Silva',
-      specialty: 'Psicóloga',
-      date: '28/09/2026',
-      price: 'R$ 180,00',
-      img: avatar,
-      feedback: 'Paciente apresentou excelente evolução nas sessões de TCC. Recomenda-se manter a rotina diária de diário de pensamentos e exercícios de respiração diafragmática.',
-    },
-    {
-      id: '3',
-      doctor: 'Dr. Carlos Eduardo',
-      specialty: 'Psiquiatra',
-      date: '15/09/2026',
-      price: 'R$ 350,00',
-      img: avatar,
-      feedback: 'Manutenção da medicação atual por mais 30 dias. Encaminhamento enviado para acompanhamento conjunto com neuropsicólogo.',
-    },
-  ]);
-
-  const [doctorsList, setDoctorsList] = useState<any[]>([
-    {
-      id: 'd1',
-      name: 'Dra. Camila Ribeiro',
-      profession: 'Psicóloga (CRP 06/123456)',
-      rating: '4.9 (48 avaliações)',
-      price: 'R$ 200,00 / hora',
-      img: avatar,
-      bio: 'Trabalho com a Terapia Cognitivo-Comportamental focada em ansiedade e burnout.',
-    },
-    {
-      id: 'd2',
-      name: 'Dr. Lucas Martins',
-      profession: 'Psiquiatra (CRM 123456/SP - RQE 789)',
-      rating: '4.8 (32 avaliações)',
-      price: 'R$ 400,00 / hora',
-      img: avatar,
-      bio: 'Atendimento psiquiátrico humanizado e focado em diagnóstico preciso.',
-    },
-  ]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [completedAppointments, setCompletedAppointments] = useState<any[]>([]);
+  const [doctorsList, setDoctorsList] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -137,10 +96,32 @@ export default function UserScreen() {
           })));
       } catch (error) {
         if (error instanceof ApiError) Alert.alert('Erro', error.message);
+      } finally {
+        setLoading(false);
       }
     };
     load();
   }, []);
+
+  const chooseProfilePhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setProfileFeedback('Permissão para acessar a galeria foi negada.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setProfilePhoto(asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri);
+      setProfileFeedback('');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -149,7 +130,7 @@ export default function UserScreen() {
       {/* Header Superior Fixo */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.burgerBtn}>
+          <TouchableOpacity style={styles.burgerBtn} onPress={() => setDrawerOpen(true)}>
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
@@ -161,6 +142,8 @@ export default function UserScreen() {
             style={styles.searchInput}
             placeholder="Pesquisar..."
             placeholderTextColor="#fe9e8e"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
           <Image source={avatar} style={styles.profileImg} />
         </View>
@@ -168,6 +151,13 @@ export default function UserScreen() {
 
       {/* Conteúdo Dinâmico Baseado na Aba Ativa */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#7500a8" />
+            <Text style={styles.loadingText}>Carregando dados...</Text>
+          </View>
+        ) : (
+          <>
         {activeTab === 'home' && (
           <View>
             <Text style={styles.pageTitle}>Página Inicial</Text>
@@ -254,7 +244,13 @@ export default function UserScreen() {
           <View>
             <Text style={styles.pageTitle}>Buscar Consultas</Text>
             <Text style={styles.pageSubtitle}>Encontre o profissional ideal para o seu acompanhamento:</Text>
-            {doctorsList.map((doc) => (
+            {doctorsList
+              .filter((doc) => {
+                const query = searchQuery.trim().toLowerCase();
+                if (!query) return true;
+                return `${doc.name} ${doc.profession} ${doc.bio}`.toLowerCase().includes(query);
+              })
+              .map((doc) => (
               <TouchableOpacity
                 key={doc.id}
                 style={styles.doctorCard}
@@ -309,8 +305,8 @@ export default function UserScreen() {
 
             <View style={styles.settingsGroup}>
               <View style={styles.profileAvatarWrapper}>
-                <Image source={avatar} style={styles.profileAvatarLg} />
-                <TouchableOpacity style={styles.avatarUploadBtn}>
+                <Image source={profilePhoto ? { uri: profilePhoto } : avatar} style={styles.profileAvatarLg} />
+                <TouchableOpacity style={styles.avatarUploadBtn} onPress={chooseProfilePhoto}>
                   <Text style={styles.avatarUploadBtnText}>Alterar Foto</Text>
                 </TouchableOpacity>
               </View>
@@ -335,17 +331,26 @@ export default function UserScreen() {
                 />
               </View>
 
+              {profileFeedback ? (
+                <Text accessibilityRole="alert" style={styles.profileFeedback}>{profileFeedback}</Text>
+              ) : null}
+
               <TouchableOpacity
                 style={styles.saveSettingsBtn}
                 onPress={async () => {
                   try {
                     await api('/api/v1/profile/me', {
                       method: 'PATCH',
-                      body: JSON.stringify({ nome: profileName, descricao: profileBio }),
+                      body: JSON.stringify({
+                        nome: profileName,
+                        descricao: profileBio,
+                        ...(profilePhoto ? { foto: profilePhoto } : {}),
+                      }),
                     });
+                    setProfileFeedback('Perfil salvo com sucesso.');
                     Alert.alert('Perfil salvo com sucesso!');
                   } catch (error) {
-                    Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                    setProfileFeedback(error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
                   }
                 }}
               >
@@ -395,7 +400,44 @@ export default function UserScreen() {
             </View>
           </View>
         )}
+          </>
+        )}
       </ScrollView>
+
+      <Modal visible={drawerOpen} transparent animationType="fade" onRequestClose={() => setDrawerOpen(false)}>
+        <View style={styles.drawerBackdrop}>
+          <TouchableOpacity style={styles.drawerOverlay} onPress={() => setDrawerOpen(false)} />
+          <View style={styles.drawer}>
+            <Text style={styles.drawerTitle}>EcliPsi</Text>
+            {[
+              { label: 'Início', tab: 'home' as const },
+              { label: 'Minhas Consultas', tab: 'consultas' as const },
+              { label: 'Perfil', tab: 'perfil' as const },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.tab}
+                style={styles.drawerItem}
+                onPress={() => {
+                  setActiveTab(item.tab);
+                  setDrawerOpen(false);
+                }}
+              >
+                <Text style={styles.drawerItemText}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={[styles.drawerItem, styles.drawerLogout]}
+              onPress={async () => {
+                await clearAuthSession();
+                setDrawerOpen(false);
+                router.replace('/auth/login');
+              }}
+            >
+              <Text style={styles.drawerItemText}>Sair</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Navegação Inferior (Bottom Navigation) */}
       <View style={styles.bottomNav}>
@@ -899,5 +941,63 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#f5dfff',
     paddingBottom: 4,
+  },
+  loadingContainer: {
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    color: '#475569',
+    fontSize: 14,
+  },
+  profileFeedback: {
+    width: '100%',
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#DCFCE7',
+    color: '#166534',
+    textAlign: 'center',
+  },
+  drawerBackdrop: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  drawerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+  },
+  drawer: {
+    width: 280,
+    maxWidth: '80%',
+    backgroundColor: '#FFFFFF',
+    paddingTop: 32,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  drawerTitle: {
+    color: '#322c8e',
+    fontSize: 24,
+    fontWeight: '900',
+    marginBottom: 24,
+  },
+  drawerItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  drawerItemText: {
+    color: '#0F172A',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  drawerLogout: {
+    marginTop: 16,
+    borderBottomWidth: 0,
   },
 });
