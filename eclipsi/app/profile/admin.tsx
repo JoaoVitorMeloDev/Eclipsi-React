@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api, ApiError } from '../../lib/api';
+import { api, ApiError, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import {
   StyleSheet,
   View,
@@ -24,12 +26,13 @@ export default function AdminScreen() {
   // Estados de dados da API
   const [users, setUsers] = useState<any[]>([]);
   const [stats, setStats] = useState<any>({
-    total_pacientes: 0,
-    total_medicos: 0,
-    receita: {},
+    pacientes: 0,
+    medicos: 0,
+    pagamentos: { valor: 0, taxa_plataforma: 0, repasse: 0 },
     especialidades: {},
   });
   const [adminProfile, setAdminProfile] = useState({ nome: '', email: '' });
+  const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [adminPassword, setAdminPassword] = useState('');
 
   // Estados de Busca e Edição de Usuários
@@ -72,12 +75,14 @@ export default function AdminScreen() {
 
   const loadAdminProfile = async () => {
     try {
-      const data = await api<{ success?: boolean; user?: { nome?: string; email?: string } }>('/api/me');
+      const data = await api<{ success?: boolean; user?: { nome?: string; email?: string; foto?: string } }>('/api/me');
       if (data.success) {
         setAdminProfile({
           nome: data.user?.nome || '',
           email: data.user?.email || '',
         });
+        setAdminPhoto(data.user?.foto || null);
+        setProfileAvatar(data.user?.foto || null);
       }
     } catch (e) {
       console.error('Erro ao carregar perfil do administrador:', e);
@@ -88,9 +93,11 @@ export default function AdminScreen() {
   // Carregamento inicial de dados equivalentes ao DOMContentLoaded
   /* eslint-disable react-hooks/set-state-in-effect -- os dados sao carregados por chamadas externas ao montar a tela */
   useEffect(() => {
+    const unsubscribeAvatar = subscribeProfileAvatar(setAdminPhoto);
     loadUsers();
     loadStats();
     loadAdminProfile();
+    return unsubscribeAvatar;
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -129,11 +136,29 @@ export default function AdminScreen() {
     try {
       const result = await api<{ success?: boolean; message?: string }>('/api/v1/profile/me', {
         method: 'PATCH',
-        body: JSON.stringify({ nome: adminProfile.nome }),
+        body: JSON.stringify({ nome: adminProfile.nome, ...(adminPhoto ? { foto: adminPhoto } : {}) }),
       });
       Alert.alert(result.message || 'Perfil atualizado.');
     } catch (err) {
       Alert.alert('Erro', err instanceof ApiError ? err.message : 'Erro ao atualizar perfil de administrador.');
+    }
+  };
+
+  const chooseAdminPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      const uri = asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri;
+      setAdminPhoto(uri);
+      setProfileAvatar(uri);
     }
   };
 
@@ -152,11 +177,11 @@ export default function AdminScreen() {
             onPress={() => setSidebarOpen(true)}
             activeOpacity={0.7}
           >
-            <View style={styles.burgerLine} />
-            <View style={styles.burgerLine} />
-            <View style={styles.burgerLine} />
+            <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.logo}>MinhaLogo | Administrador</Text>
+          <Image source={require('../../assets/images/logo.png')} style={{ width: 40, height: 40 }} resizeMode="contain" />
+          <Text style={styles.logo}>EcliPsi</Text>
+          <View style={styles.adminBadge}><Text style={styles.adminBadgeText}>ADMINISTRADOR</Text></View>
         </View>
 
         <View style={styles.headerRight}>
@@ -172,7 +197,7 @@ export default function AdminScreen() {
             value={searchQuery}
           />
           <Image
-            source={avatar}
+            source={adminPhoto ? { uri: adminPhoto } : avatar}
             style={styles.profileImg}
           />
         </View>
@@ -310,21 +335,17 @@ export default function AdminScreen() {
               <View style={styles.earningsGrid}>
                 <View style={styles.earningsCard}>
                   <Text style={styles.earningsLabel}>Arrecadado neste Mês</Text>
-                  <Text style={styles.earningsValue}>{brl(stats.receita?.mes_atual)}</Text>
-                  <Text style={styles.earningsSubtext}>
-                    {stats.receita?.variacao_pct == null
-                      ? 'Sem dados do mês anterior'
-                      : `${stats.receita?.variacao_pct >= 0 ? '+' : ''}${stats.receita?.variacao_pct}% que o mês anterior`}
-                  </Text>
+                  <Text style={styles.earningsValue}>{brl(stats.pagamentos?.valor)}</Text>
+                  <Text style={styles.earningsSubtext}>Valor total registrado</Text>
                 </View>
 
                 <View style={[styles.earningsCard, styles.earningsCardHighlight]}>
                   <Text style={[styles.earningsLabel, styles.highlightText]}>
-                    Arrecadado no Ano ({stats.receita?.ano_ref})
+                    Taxa da plataforma
                   </Text>
-                  <Text style={[styles.earningsValue, styles.highlightValue]}>{brl(stats.receita?.ano)}</Text>
+                  <Text style={[styles.earningsValue, styles.highlightValue]}>{brl(stats.pagamentos?.taxa_plataforma)}</Text>
                   <Text style={[styles.earningsSubtext, styles.highlightSub]}>
-                    Taxa: {brl(stats.receita?.taxa_ano)} · Repasses: {brl(stats.receita?.repasse_ano)}
+                    Repasse: {brl(stats.pagamentos?.repasse)}
                   </Text>
                 </View>
               </View>
@@ -335,12 +356,12 @@ export default function AdminScreen() {
               <View style={styles.earningsGrid}>
                 <View style={styles.earningsCard}>
                   <Text style={styles.earningsLabel}>Usuários Comuns (Pacientes)</Text>
-                  <Text style={styles.earningsValue}>{stats.total_pacientes}</Text>
+                  <Text style={styles.earningsValue}>{stats.pacientes}</Text>
                   <Text style={styles.earningsSubtext}>Total registrado na base</Text>
                 </View>
                 <View style={styles.earningsCard}>
                   <Text style={styles.earningsLabel}>Médicos / Profissionais</Text>
-                  <Text style={styles.earningsValue}>{stats.total_medicos}</Text>
+                  <Text style={styles.earningsValue}>{stats.medicos}</Text>
                   <Text style={styles.earningsSubtext}>Total registrado na base</Text>
                 </View>
               </View>
@@ -353,7 +374,7 @@ export default function AdminScreen() {
                   <Text style={{ color: '#666' }}>Nenhum profissional cadastrado por enquanto.</Text>
                 ) : (
                   Object.entries(stats.especialidades || {}).map(([esp, count]: [string, any], idx) => {
-                    const totalMedicos = stats.total_medicos || 1;
+                    const totalMedicos = stats.medicos || 1;
                     const percentage = ((count / totalMedicos) * 100).toFixed(1);
                     const espName = esp.charAt(0).toUpperCase() + esp.slice(1);
 
@@ -381,10 +402,10 @@ export default function AdminScreen() {
               <View style={styles.settingsGroup}>
                 <View style={styles.profileAvatarWrapper}>
                   <Image
-                    source={avatar}
+                    source={adminPhoto ? { uri: adminPhoto } : avatar}
                     style={styles.profileAvatarLg}
                   />
-                  <TouchableOpacity style={styles.avatarUploadBtn}>
+                  <TouchableOpacity style={styles.avatarUploadBtn} onPress={chooseAdminPhoto}>
                     <Text style={styles.avatarUploadText}>Alterar Foto</Text>
                   </TouchableOpacity>
                 </View>
@@ -538,10 +559,10 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f5dfff',
+    backgroundColor: '#EEF2FF',
   },
   header: {
-    backgroundColor: '#7500a8',
+    backgroundColor: '#1E1B4B',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -575,6 +596,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  adminBadge: {
+    marginLeft: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#4F46E5',
+  },
+  adminBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '900',
   },
   profileImg: {
     width: 40,

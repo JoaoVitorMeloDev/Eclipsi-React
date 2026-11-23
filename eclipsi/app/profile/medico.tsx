@@ -78,7 +78,8 @@ export default function MedicoScreen() {
       {/* Header Fixo */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.logo}>MinhaLogo | Profissional</Text>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
+          <Text style={styles.logo}>EcliPsi | Profissional</Text>
         </View>
         <View style={styles.headerRight}>
           <TextInput
@@ -455,6 +456,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
   },
   logo: {
     fontSize: 18,

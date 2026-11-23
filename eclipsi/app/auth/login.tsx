@@ -70,8 +70,8 @@ export default function LoginScreen() {
           user?: { role?: string };
         }>("/api/me");
         const tipo = String(session.user?.role ?? data.user?.tipo ?? data.user?.role ?? "").toLowerCase();
-        if (tipo.includes("admin")) router.replace("/profile/admin");
-        else if (tipo.includes("med") || tipo.includes("doctor")) router.replace("/profile/medico");
+        if (tipo === "admin") router.replace("/profile/admin");
+        else if (tipo === "medico" || tipo === "profissional" || tipo === "doctor") router.replace("/profile/medico");
         else router.replace("/profile/user");
       } else {
         setFeedback(data.message || "E-mail ou senha incorretos.");

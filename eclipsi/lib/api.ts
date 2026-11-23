@@ -19,6 +19,20 @@ export async function clearAuthSession(): Promise<void> {
   await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
+let avatarListeners = new Set<(uri: string | null) => void>();
+let currentAvatar: string | null = null;
+
+export function subscribeProfileAvatar(listener: (uri: string | null) => void): () => void {
+  avatarListeners.add(listener);
+  listener(currentAvatar);
+  return () => { avatarListeners.delete(listener); };
+}
+
+export function setProfileAvatar(uri: string | null): void {
+  currentAvatar = uri;
+  avatarListeners.forEach((listener) => listener(uri));
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,

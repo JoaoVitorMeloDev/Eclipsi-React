@@ -27,6 +27,15 @@ export default function CadastroMedicoScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; type: "error" | "success" } | null>(null);
+  const specialties = ["Psicólogo(a)", "Psiquiatra", "Psicanalista", "Terapeuta Ocupacional", "Neuropsicólogo(a)"];
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
 
   // Lógica de envio do formulário adaptada do api.js
   const handleSubmit = async () => {
@@ -39,6 +48,19 @@ export default function CadastroMedicoScreen() {
       setFeedback({ text: "Informe um e-mail profissional válido.", type: "error" });
       return;
     }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits && phoneDigits.length !== 10 && phoneDigits.length !== 11) {
+      setFeedback({ text: "Telefone deve conter 10 ou 11 dígitos.", type: "error" });
+      return;
+    }
+    if (!specialty) {
+      setFeedback({ text: "Selecione uma especialidade.", type: "error" });
+      return;
+    }
+    if (councilNumber.trim().length > 15) {
+      setFeedback({ text: "Registro profissional deve ter no máximo 15 caracteres.", type: "error" });
+      return;
+    }
     if (password !== confirmPassword) {
       setFeedback({ text: "As senhas não coincidem.", type: "error" });
       return;
@@ -48,7 +70,7 @@ export default function CadastroMedicoScreen() {
     const payload = {
       nome: name,
       email: email,
-      telefone: phone,
+      telefone: phoneDigits || null,
       especialidade: specialty,
       registro: councilNumber,
       uf: councilUf,
@@ -145,19 +167,25 @@ export default function CadastroMedicoScreen() {
                   placeholderTextColor="#64748B"
                   keyboardType="phone-pad"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={(value) => setPhone(formatPhone(value))}
+                  maxLength={15}
                 />
               </View>
 
               {/* Especialidade / Profissão (Simulado com TextInput ou Picker) */}
               <View style={styles.sentenceLine}>
-                <TextInput
-                  style={styles.registerInput}
-                  placeholder="Especialidade (Ex: Psiquiatra, Psicólogo)"
-                  placeholderTextColor="#64748B"
-                  value={specialty}
-                  onChangeText={setSpecialty}
-                />
+                <View style={styles.optionGroup}>
+                  {specialties.map((option) => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[styles.optionChip, specialty === option && styles.optionChipActive]}
+                      onPress={() => setSpecialty(option)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.optionChipText, specialty === option && styles.optionChipTextActive]}>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
 
               {/* Grupo para Conselho e UF */}
@@ -169,6 +197,7 @@ export default function CadastroMedicoScreen() {
                     placeholderTextColor="#64748B"
                     value={councilNumber}
                     onChangeText={setCouncilNumber}
+                    maxLength={15}
                   />
                 </View>
                 <View
@@ -375,6 +404,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     width: "100%",
+  },
+  optionGroup: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  optionChip: {
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+  optionChipActive: {
+    backgroundColor: "#322c8e",
+    borderColor: "#322c8e",
+  },
+  optionChipText: {
+    color: "#0F172A",
+    fontSize: 12,
+  },
+  optionChipTextActive: {
+    color: "#FFFFFF",
   },
   sentenceLine: {
     alignItems: "flex-start",

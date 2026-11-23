@@ -26,6 +26,14 @@ export default function CadastroUserScreen() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; type: "error" | "success" } | null>(null);
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
   // Lógica de submissão baseada no seu script.js / api.js
   const handleRegister = async () => {
     setFeedback(null);
@@ -37,6 +45,15 @@ export default function CadastroUserScreen() {
       setFeedback({ text: "Informe um e-mail válido.", type: "error" });
       return;
     }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits && phoneDigits.length !== 10 && phoneDigits.length !== 11) {
+      setFeedback({ text: "Telefone deve conter 10 ou 11 dígitos.", type: "error" });
+      return;
+    }
+    if (!gender) {
+      setFeedback({ text: "Selecione uma opção de gênero.", type: "error" });
+      return;
+    }
     if (password !== confirmPassword) {
       setFeedback({ text: "As senhas não coincidem.", type: "error" });
       return;
@@ -46,7 +63,7 @@ export default function CadastroUserScreen() {
     const payload = {
       nome: name,
       email: email,
-      telefone: phone,
+      telefone: phoneDigits || null,
       idade: age ? Number(age) : null,
       genero: gender,
       senha: password,
@@ -138,7 +155,8 @@ export default function CadastroUserScreen() {
                   placeholderTextColor="#64748B"
                   keyboardType="phone-pad"
                   value={phone}
-                  onChangeText={setPhone}
+                  onChangeText={(value) => setPhone(formatPhone(value))}
+                  maxLength={15}
                 />
               </View>
 
@@ -156,14 +174,18 @@ export default function CadastroUserScreen() {
                   />
                 </View>
                 <View style={[styles.sentenceLine, { flex: 1 }]}>
-                  {/* Nota: No React Native, selects costumam usar bibliotecas como @react-native-picker/picker */}
-                  <TextInput
-                    style={styles.registerInput}
-                    placeholder="Gênero"
-                    placeholderTextColor="#64748B"
-                    value={gender}
-                    onChangeText={setGender}
-                  />
+                  <View style={styles.optionGroup}>
+                    {["Feminino", "Masculino", "Outro", "Prefiro não informar"].map((option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={[styles.optionChip, gender === option && styles.optionChipActive]}
+                        onPress={() => setGender(option)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.optionChipText, gender === option && styles.optionChipTextActive]}>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               </View>
 
@@ -328,6 +350,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     width: "100%",
+  },
+  optionGroup: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  optionChip: {
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+  optionChipActive: {
+    backgroundColor: "#322c8e",
+    borderColor: "#322c8e",
+  },
+  optionChipText: {
+    color: "#0F172A",
+    fontSize: 12,
+  },
+  optionChipTextActive: {
+    color: "#FFFFFF",
   },
   sentenceLine: {
     alignItems: "center",

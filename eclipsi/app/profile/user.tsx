@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api, ApiError, clearAuthSession } from '../../lib/api';
+import { api, ApiError, clearAuthSession, setProfileAvatar, subscribeProfileAvatar } from '../../lib/api';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -26,6 +26,10 @@ export default function UserScreen() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingTime, setBookingTime] = useState('14:00');
+  const [bookingFeedback, setBookingFeedback] = useState('');
   const [profileFeedback, setProfileFeedback] = useState('');
   // Estados para navegação entre abas ('home', 'consultas', 'perfil', 'configuracoes')
   const [activeTab, setActiveTab] = useState<'home' | 'consultas' | 'perfil' | 'configuracoes'>('home');
@@ -51,6 +55,7 @@ export default function UserScreen() {
   const [doctorsList, setDoctorsList] = useState<any[]>([]);
 
   useEffect(() => {
+    const unsubscribeAvatar = subscribeProfileAvatar(setProfilePhoto);
     const load = async () => {
       try {
         const [profile, doctors, appointments] = await Promise.all([
@@ -62,6 +67,8 @@ export default function UserScreen() {
         setProfileBio(profile.profile?.descricao || '');
         setUserEmail(profile.profile?.email || '');
         setUserPhone(profile.profile?.telefone || '');
+        setProfilePhoto(profile.profile?.foto || null);
+        setProfileAvatar(profile.profile?.foto || null);
         setDoctorsList(doctors.doctors.map((doctor) => ({
           id: doctor.id,
           name: doctor.nome,
@@ -69,6 +76,10 @@ export default function UserScreen() {
           rating: 'Disponível',
           price: `R$ ${Number(doctor.valor_hora || 0).toFixed(2)} / hora`,
           img: avatar,
+          foto: doctor.foto,
+          registro: doctor.registro,
+          uf: doctor.uf,
+          valorHora: doctor.valor_hora,
           bio: doctor.descricao || 'Profissional em saúde mental.',
         })));
         setUpcomingAppointments(appointments.appointments
@@ -101,6 +112,7 @@ export default function UserScreen() {
       }
     };
     load();
+    return unsubscribeAvatar;
   }, []);
 
   const chooseProfilePhoto = async () => {
@@ -119,6 +131,7 @@ export default function UserScreen() {
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
       setProfilePhoto(asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri);
+      setProfileAvatar(asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri);
       setProfileFeedback('');
     }
   };
@@ -135,7 +148,8 @@ export default function UserScreen() {
             <View style={styles.burgerLine} />
             <View style={styles.burgerLine} />
           </TouchableOpacity>
-          <Text style={styles.logo}>MinhaLogo</Text>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
+          <Text style={styles.logo}>EcliPsi</Text>
         </View>
         <View style={styles.headerRight}>
           <TextInput
@@ -145,7 +159,7 @@ export default function UserScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Image source={avatar} style={styles.profileImg} />
+          <Image source={profilePhoto ? { uri: profilePhoto } : avatar} style={styles.profileImg} />
         </View>
       </View>
 
@@ -254,6 +268,10 @@ export default function UserScreen() {
               <TouchableOpacity
                 key={doc.id}
                 style={styles.doctorCard}
+                onPress={() => {
+                  setSelectedDoctor(doc);
+                  setBookingFeedback('');
+                }}
               >
                 <Image source={doc.img} style={styles.cardImg} />
                 <View style={styles.cardInfo}>
@@ -403,6 +421,62 @@ export default function UserScreen() {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={!!selectedDoctor} transparent animationType="fade" onRequestClose={() => setSelectedDoctor(null)}>
+        <View style={styles.drawerBackdrop}>
+          <TouchableOpacity style={styles.drawerOverlay} onPress={() => setSelectedDoctor(null)} />
+          {selectedDoctor ? (
+            <View style={styles.doctorModal}>
+              <Text style={styles.drawerTitle}>{selectedDoctor.name}</Text>
+              <Text style={styles.modalMeta}>{selectedDoctor.profession}</Text>
+              {selectedDoctor.registro ? <Text style={styles.modalMeta}>Registro: {selectedDoctor.registro}</Text> : null}
+              {selectedDoctor.uf ? <Text style={styles.modalMeta}>UF: {selectedDoctor.uf}</Text> : null}
+              <Text style={styles.modalBodyText}>{selectedDoctor.bio}</Text>
+              <Text style={styles.modalPrice}>R$ {Number(selectedDoctor.valorHora || 0).toFixed(2)} / consulta</Text>
+
+              <Text style={styles.label}>Data (AAAA-MM-DD)</Text>
+              <TextInput
+                style={styles.input}
+                value={bookingDate}
+                onChangeText={setBookingDate}
+                placeholder="2026-12-01"
+                placeholderTextColor="#64748B"
+              />
+              <Text style={styles.label}>Horário</Text>
+              <TextInput
+                style={styles.input}
+                value={bookingTime}
+                onChangeText={setBookingTime}
+                placeholder="14:00"
+                placeholderTextColor="#64748B"
+              />
+              {bookingFeedback ? <Text accessibilityRole="alert" style={styles.profileFeedback}>{bookingFeedback}</Text> : null}
+              <TouchableOpacity
+                style={styles.saveSettingsBtn}
+                onPress={async () => {
+                  setBookingFeedback('');
+                  if (!bookingDate || !bookingTime) {
+                    setBookingFeedback('Informe data e horário.');
+                    return;
+                  }
+                  try {
+                    const iso = new Date(`${bookingDate}T${bookingTime}:00`).toISOString();
+                    await api('/api/v1/appointments', {
+                      method: 'POST',
+                      body: JSON.stringify({ medico_id: Number(selectedDoctor.id), data_hora: iso }),
+                    });
+                    setBookingFeedback('Consulta agendada com sucesso!');
+                  } catch (error) {
+                    setBookingFeedback(error instanceof ApiError ? error.message : 'Não foi possível agendar.');
+                  }
+                }}
+              >
+                <Text style={styles.saveSettingsBtnText}>Agendar</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
 
       <Modal visible={drawerOpen} transparent animationType="fade" onRequestClose={() => setDrawerOpen(false)}>
         <View style={styles.drawerBackdrop}>
@@ -587,6 +661,10 @@ const styles = StyleSheet.create({
     height: 3,
     backgroundColor: '#f80174',
     borderRadius: 2,
+  },
+  logoImage: {
+    width: 36,
+    height: 36,
   },
   logo: {
     fontSize: 20,
@@ -999,5 +1077,28 @@ const styles = StyleSheet.create({
   drawerLogout: {
     marginTop: 16,
     borderBottomWidth: 0,
+  },
+  doctorModal: {
+    width: '92%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    margin: 'auto',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+  },
+  modalMeta: {
+    color: '#475569',
+    marginBottom: 4,
+  },
+  modalBodyText: {
+    color: '#0F172A',
+    lineHeight: 20,
+    marginVertical: 12,
+  },
+  modalPrice: {
+    color: '#166534',
+    fontWeight: '800',
+    marginBottom: 12,
   },
 });
