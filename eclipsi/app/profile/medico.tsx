@@ -114,9 +114,11 @@ export default function MedicoScreen() {
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' }}>
-              <Ionicons name="moon" size={18} color="#FFFFFF" />
-            </View>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={{ width: 38, height: 38 }}
+              resizeMode="contain"
+            />
             <Text style={styles.logo}>EcliPsi | Profissional</Text>
           </View>
         </View>

@@ -179,9 +179,11 @@ export default function AdminScreen() {
           >
             <Ionicons name="menu" size={26} color="#FFFFFF" />
           </TouchableOpacity>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="moon" size={20} color="#FFFFFF" />
-          </View>
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={{ width: 40, height: 40 }}
+            resizeMode="contain"
+          />
           <Text style={styles.logo}>EcliPsi</Text>
           <View style={styles.adminBadge}><Text style={styles.adminBadgeText}>ADMINISTRADOR</Text></View>
         </View>

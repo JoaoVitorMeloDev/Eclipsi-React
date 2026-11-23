@@ -16,7 +16,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const avatar = require('../../assets/images/avatar.png');
 
@@ -176,7 +176,11 @@ export default function UserScreen() {
             <View style={styles.burgerLine} />
           </TouchableOpacity>
           <View style={styles.brandRow}>
-            <View style={styles.brandBadge}><Ionicons name="moon" size={18} color="#FFFFFF" /></View>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.brandBadge}
+              resizeMode="contain"
+            />
             <Text style={styles.logo}>EcliPsi</Text>
           </View>
         </View>
@@ -748,10 +752,6 @@ const styles = StyleSheet.create({
   brandBadge: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: '#4F46E5',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   logo: {
     fontSize: 20,

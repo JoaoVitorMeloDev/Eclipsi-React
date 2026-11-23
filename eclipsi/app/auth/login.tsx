@@ -12,7 +12,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -102,9 +101,11 @@ export default function LoginScreen() {
         {/* Cabeçalho com Logo e Título */}
         <View style={styles.logoTitle}>
           <View style={styles.brandRow}>
-            <View style={styles.brandBadge}>
-              <Ionicons name="moon" size={22} color="#FFFFFF" />
-            </View>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.brandBadge}
+              resizeMode="contain"
+            />
             <Text style={styles.brandTitle}>EcliPsi</Text>
           </View>
           <Text style={styles.title}>Login</Text>
@@ -267,10 +268,6 @@ const styles = StyleSheet.create({
   brandBadge: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: "#4F46E5",
-    alignItems: "center",
-    justifyContent: "center",
   },
   title: {
     color: "#0F172A",
