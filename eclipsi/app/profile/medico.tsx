@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { api, ApiError } from '../../lib/api';
+import { api, ApiError, clearAuthSession } from '../../lib/api';
+import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import {
   StyleSheet,
   View,
@@ -18,7 +21,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const avatar = require('../../assets/images/avatar.png');
 
 export default function MedicoScreen() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileFeedback, setProfileFeedback] = useState('');
   // Estados de navegação e modais
   const [activeTab, setActiveTab] = useState<'home' | 'pacientes' | 'perfil' | 'configuracoes'>('home');
   const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
@@ -33,6 +39,10 @@ export default function MedicoScreen() {
   const [councilNumber, setCouncilNumber] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
   const [profileBio, setProfileBio] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   // Dados estáticos mapeados
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -40,7 +50,7 @@ export default function MedicoScreen() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [profile, , appointmentData] = await Promise.all([
+        const [profile, dashboard, appointmentData] = await Promise.all([
           api<{ success: boolean; profile: any }>('/api/v1/profile/me'),
           api<{ success: boolean; stats: any }>('/api/v1/doctor/dashboard'),
           api<{ success: boolean; appointments: any[] }>('/api/v1/doctor/appointments'),
@@ -49,6 +59,10 @@ export default function MedicoScreen() {
         setCouncilNumber(profile.profile?.registro || '');
         setHourlyRate(String(profile.profile?.valor_hora ?? ''));
         setProfileBio(profile.profile?.descricao || '');
+        setProfileEmail(profile.profile?.email || '');
+        setProfilePhone(profile.profile?.telefone || '');
+        setProfilePhoto(profile.profile?.foto || null);
+        setDashboardStats(dashboard.stats || null);
         setAppointments(appointmentData.appointments.map((item) => ({
           id: item.id,
           patient: item.paciente_nome,
@@ -78,6 +92,9 @@ export default function MedicoScreen() {
       {/* Header Fixo */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={() => setMenuOpen(true)} accessibilityLabel="Abrir menu">
+            <Ionicons name="menu" size={26} color="#FFFFFF" />
+          </TouchableOpacity>
           <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
           <Text style={styles.logo}>EcliPsi | Profissional</Text>
         </View>
@@ -89,7 +106,7 @@ export default function MedicoScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Image source={avatar} style={styles.profileImg} />
+          <Image source={profilePhoto ? { uri: profilePhoto } : avatar} style={styles.profileImg} />
         </View>
       </View>
 
@@ -180,72 +197,15 @@ export default function MedicoScreen() {
               <Text style={styles.earningsTitle}>📈 Resumo de Ganhos</Text>
               <View style={styles.earningsGrid}>
                 <View style={styles.earningsCard}>
-                  <Text style={styles.earningsLabel}>Ganhos neste Mês (Setembro)</Text>
-                  <Text style={styles.earningsValue}>R$ 4.800,00</Text>
-                  <Text style={styles.earningsSubtext}>+12% em relação ao mês anterior</Text>
+                  <Text style={styles.earningsLabel}>Ganhos Realizados</Text>
+                  <Text style={styles.earningsValue}>R$ {dashboardStats ? Number(dashboardStats.faturamento || 0).toFixed(2) : '0.00'}</Text>
+                  <Text style={styles.earningsSubtext}>{dashboardStats?.consultas_pagantes || 0} consultas pagantes</Text>
                 </View>
                 <View style={[styles.earningsCard, styles.earningsCardHighlight]}>
-                  <Text style={[styles.earningsLabel, styles.earningsLabelHighlight]}>Ganhos Acumulados no Ano (2026)</Text>
-                  <Text style={[styles.earningsValue, styles.earningsValueHighlight]}>R$ 52.400,00</Text>
-                  <Text style={[styles.earningsSubtext, styles.earningsSubtextHighlight]}>262 consultas realizadas</Text>
+                  <Text style={[styles.earningsLabel, styles.earningsLabelHighlight]}>Próximas / Realizadas</Text>
+                  <Text style={[styles.earningsValue, styles.earningsValueHighlight]}>{dashboardStats?.agendadas || 0} / {dashboardStats?.realizadas || 0}</Text>
+                  <Text style={[styles.earningsSubtext, styles.earningsSubtextHighlight]}>Consultas reais</Text>
                 </View>
-              </View>
-            </View>
-
-            {/* Formulário de Perfil */}
-            <View style={styles.settingsForm}>
-              <View style={styles.settingsGroup}>
-                <View style={styles.profileAvatarWrapper}>
-                  <Image source={avatar} style={styles.profileAvatarLg} />
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Nome Completo</Text>
-                  <TextInput style={styles.input} value={profileName} onChangeText={setProfileName} />
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Nº do Registro (CRP / CRM)</Text>
-                  <TextInput style={styles.input} value={councilNumber} onChangeText={setCouncilNumber} />
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Valor da Consulta (R$ / hora)</Text>
-                  <TextInput style={styles.input} value={hourlyRate} onChangeText={setHourlyRate} />
-                </View>
-
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Apresentação e Abordagem Terapêutica</Text>
-                  <TextInput 
-                    style={[styles.input, styles.textArea]} 
-                    multiline 
-                    numberOfLines={4} 
-                    value={profileBio} 
-                    onChangeText={setProfileBio} 
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={styles.saveSettingsBtn}
-                  onPress={async () => {
-                    try {
-                      await api('/api/v1/profile/me', {
-                        method: 'PATCH',
-                        body: JSON.stringify({
-                          nome: profileName,
-                          registro: councilNumber,
-                          valor_hora: Number(hourlyRate.replace(',', '.')),
-                          descricao: profileBio,
-                        }),
-                      });
-                      Alert.alert('Perfil atualizado com sucesso!');
-                    } catch (error) {
-                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
-                    }
-                  }}
-                >
-                  <Text style={styles.btnText}>Salvar Perfil Profissional</Text>
-                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -263,23 +223,76 @@ export default function MedicoScreen() {
 
             <View style={styles.settingsForm}>
               <View style={styles.settingsGroup}>
-                <Text style={styles.sectionSubTitle}>Acesso Profissional</Text>
+                <View style={styles.profileAvatarWrapper}>
+                  <Image source={profilePhoto ? { uri: profilePhoto } : avatar} style={styles.profileAvatarLg} />
+                  <TouchableOpacity
+                    style={styles.saveSettingsBtn}
+                    onPress={async () => {
+                      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                      if (!permission.granted) {
+                        setProfileFeedback('Permissão para acessar fotos foi negada.');
+                        return;
+                      }
+                      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.7, base64: true });
+                      if (!result.canceled && result.assets[0]) {
+                        const asset = result.assets[0];
+                        setProfilePhoto(asset.base64 ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}` : asset.uri);
+                      }
+                    }}
+                  >
+                    <Text style={styles.btnText}>Alterar Foto</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Nome Completo</Text>
+                  <TextInput style={styles.input} value={profileName} onChangeText={setProfileName} />
+                </View>
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>E-mail Profissional</Text>
-                  <TextInput style={styles.input} defaultValue="dra.anasilva@saudemental.com" />
+                  <TextInput style={styles.input} value={profileEmail} onChangeText={setProfileEmail} keyboardType="email-address" autoCapitalize="none" />
                 </View>
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Telefone / WhatsApp</Text>
-                  <TextInput style={styles.input} defaultValue="(11) 99999-8888" />
+                  <TextInput
+                    style={styles.input}
+                    value={profilePhone}
+                    onChangeText={(value) => setProfilePhone(value.replace(/\D/g, '').slice(0, 11))}
+                    keyboardType="phone-pad"
+                    maxLength={11}
+                  />
                 </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Registro CRP/CRM</Text>
+                  <TextInput style={styles.input} value={councilNumber} onChangeText={setCouncilNumber} maxLength={15} />
+                </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Valor da Consulta (R$)</Text>
+                  <TextInput style={styles.input} value={hourlyRate} onChangeText={setHourlyRate} keyboardType="decimal-pad" />
+                </View>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Abordagem / Descrição</Text>
+                  <TextInput style={[styles.input, styles.textArea]} value={profileBio} onChangeText={setProfileBio} multiline numberOfLines={4} />
+                </View>
+                {profileFeedback ? <Text accessibilityRole="alert" style={styles.profileFeedback}>{profileFeedback}</Text> : null}
                 <TouchableOpacity
                   style={styles.saveSettingsBtn}
                   onPress={async () => {
                     try {
-                      await api('/api/v1/profile/me', { method: 'PATCH', body: JSON.stringify({ telefone: '(11) 99999-8888' }) });
-                      Alert.alert('Configurações salvas!');
+                      await api('/api/v1/profile/me', {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                          nome: profileName,
+                          email: profileEmail,
+                          telefone: profilePhone,
+                          registro: councilNumber,
+                          valor_hora: Number(hourlyRate.replace(',', '.')),
+                          descricao: profileBio,
+                          ...(profilePhoto ? { foto: profilePhoto } : {}),
+                        }),
+                      });
+                      setProfileFeedback('Perfil atualizado com sucesso!');
                     } catch (error) {
-                      Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
+                      setProfileFeedback(error instanceof ApiError ? error.message : 'Nao foi possivel salvar.');
                     }
                   }}
                 >
@@ -292,6 +305,27 @@ export default function MedicoScreen() {
           </>
         )}
       </ScrollView>
+
+      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+        <View style={styles.menuBackdrop}>
+          <TouchableOpacity style={styles.menuOverlay} onPress={() => setMenuOpen(false)} />
+          <View style={styles.menuPanel}>
+            {[
+              { label: 'Resumo', tab: 'home' as const },
+              { label: 'Pacientes', tab: 'pacientes' as const },
+              { label: 'Perfil', tab: 'perfil' as const },
+              { label: 'Configurações', tab: 'configuracoes' as const },
+            ].map((item) => (
+              <TouchableOpacity key={item.label} style={styles.menuItem} onPress={() => { setActiveTab(item.tab); setMenuOpen(false); }}>
+                <Text style={styles.menuItemText}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity style={styles.menuItem} onPress={async () => { await clearAuthSession(); setMenuOpen(false); router.replace('/auth/login'); }}>
+              <Text style={styles.menuItemText}>Sair</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal de Detalhes da Consulta / Prontuário */}
       <Modal visible={!!selectedAppointment} animationType="slide" transparent={true}>
@@ -845,5 +879,39 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#475569',
     fontSize: 14,
+  },
+  profileFeedback: {
+    width: '100%',
+    marginVertical: 8,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#DCFCE7',
+    color: '#166534',
+    textAlign: 'center',
+  },
+  menuBackdrop: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15,23,42,0.35)',
+  },
+  menuPanel: {
+    width: 280,
+    maxWidth: '80%',
+    backgroundColor: '#FFFFFF',
+    paddingTop: 32,
+    paddingHorizontal: 16,
+  },
+  menuItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  menuItemText: {
+    color: '#0F172A',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

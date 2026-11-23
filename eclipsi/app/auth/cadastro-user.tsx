@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     borderRadius: 75,
   },
   title: {
-    color: "white",
+    color: "#0F172A",
     fontSize: 28,
     fontWeight: "bold",
   },

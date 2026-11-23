@@ -27,7 +27,7 @@ export default function CadastroMedicoScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; type: "error" | "success" } | null>(null);
-  const specialties = ["Psicólogo(a)", "Psiquiatra", "Psicanalista", "Terapeuta Ocupacional", "Neuropsicólogo(a)"];
+  const specialties = ["Psicólogo(a)", "Psiquiatra", "Psicanalista", "Neuropsicólogo(a)"];
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, "").slice(0, 11);

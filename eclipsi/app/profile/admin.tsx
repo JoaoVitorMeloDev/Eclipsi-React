@@ -370,23 +370,27 @@ export default function AdminScreen() {
             <View style={{ marginTop: 24 }}>
               <Text style={styles.earningsTitle}>Profissionais por Especialidade</Text>
               <View style={styles.statsCategoryGrid}>
-                {Object.keys(stats.especialidades || {}).length === 0 ? (
+                {(() => {
+                  const especialidades = Array.isArray(stats.especialidades)
+                    ? stats.especialidades
+                    : Object.entries(stats.especialidades || {}).map(([especialidade, total]) => ({ especialidade, total }));
+                  return especialidades.length === 0 ? (
                   <Text style={{ color: '#666' }}>Nenhum profissional cadastrado por enquanto.</Text>
-                ) : (
-                  Object.entries(stats.especialidades || {}).map(([esp, count]: [string, any], idx) => {
+                  ) : especialidades.map((item: any, idx: number) => {
+                    const esp = String(item.especialidade || item.nome || 'Não informada');
+                    const count = Number(item.total ?? item.count ?? 0);
                     const totalMedicos = stats.medicos || 1;
                     const percentage = ((count / totalMedicos) * 100).toFixed(1);
-                    const espName = esp.charAt(0).toUpperCase() + esp.slice(1);
 
                     return (
                       <View key={idx} style={styles.categoryCard}>
-                        <Text style={styles.categoryCardTitle}>{espName}s</Text>
+                        <Text style={styles.categoryCardTitle}>{esp}</Text>
                         <Text style={styles.categoryCardCount}>{count}</Text>
                         <Text style={styles.categoryCardSub}>{percentage}% do total</Text>
                       </View>
                     );
-                  })
-                )}
+                  });
+                })()}
               </View>
             </View>
           </View>

@@ -115,6 +115,22 @@ export default function UserScreen() {
     return unsubscribeAvatar;
   }, []);
 
+  const reloadAppointments = async () => {
+    const result = await api<{ success: boolean; appointments: any[] }>('/api/v1/appointments');
+    setUpcomingAppointments(result.appointments
+      .filter((item) => item.status === 'agendada')
+      .map((item) => ({
+        id: item.id,
+        doctor: item.medico_nome,
+        specialty: item.especialidade,
+        date: new Date(item.data_hora).toLocaleString('pt-BR'),
+        price: `R$ ${Number(item.valor).toFixed(2)}`,
+        img: avatar,
+        status: item.status,
+        annotation: item.anotacoes,
+      })));
+  };
+
   const chooseProfilePhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -292,8 +308,13 @@ export default function UserScreen() {
                           body: JSON.stringify({
                             medico_id: Number(doc.id),
                             data_hora: date.toISOString(),
+                            valor: doc.valorHora,
+                            status: 'agendada',
                           }),
                         });
+                        await reloadAppointments();
+                        setActiveTab('consultas');
+                        setBookingFeedback('Consulta agendada com sucesso!');
                         Alert.alert('Consulta agendada!', date.toLocaleString('pt-BR'));
                       } catch (error) {
                         Alert.alert('Erro', error instanceof ApiError ? error.message : 'Nao foi possivel agendar.');
@@ -463,8 +484,14 @@ export default function UserScreen() {
                     const iso = new Date(`${bookingDate}T${bookingTime}:00`).toISOString();
                     await api('/api/v1/appointments', {
                       method: 'POST',
-                      body: JSON.stringify({ medico_id: Number(selectedDoctor.id), data_hora: iso }),
+                      body: JSON.stringify({
+                        medico_id: Number(selectedDoctor.id),
+                        data_hora: iso,
+                        valor: selectedDoctor.valorHora,
+                        status: 'agendada',
+                      }),
                     });
+                    await reloadAppointments();
                     setBookingFeedback('Consulta agendada com sucesso!');
                   } catch (error) {
                     setBookingFeedback(error instanceof ApiError ? error.message : 'Não foi possível agendar.');
