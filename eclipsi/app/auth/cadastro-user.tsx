@@ -245,7 +245,7 @@ function CadastroUserScreen() {
 
                 <TouchableOpacity
                   style={styles.backBtn}
-                  onPress={() => router.back()}
+                  onPress={() => router.replace("/auth/cadastro")}
                 >
                   <Text style={styles.backBtnText}>Voltar</Text>
                 </TouchableOpacity>

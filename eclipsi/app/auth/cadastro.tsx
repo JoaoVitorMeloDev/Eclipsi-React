@@ -15,7 +15,7 @@ function CadastroEscolhaScreen() {
   const router = useRouter();
   const handleMedChange = () => router.push("/auth/cadastro-medico");
   const handlePacChange = () => router.push("/auth/cadastro-user");
-  const handleGoBack = () => router.back();
+  const handleGoBack = () => router.replace("/");
   const handleLoginRedirect = () => router.push("/auth/login");
 
   return (

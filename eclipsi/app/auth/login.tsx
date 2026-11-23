@@ -154,7 +154,7 @@ function LoginScreen() {
 
               <TouchableOpacity
                 style={styles.backBtn}
-                onPress={() => router.back()}
+                onPress={() => router.replace("/")}
               >
                 <Text style={styles.backBtnText}>Voltar</Text>
               </TouchableOpacity>
