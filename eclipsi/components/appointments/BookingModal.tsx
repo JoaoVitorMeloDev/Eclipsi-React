@@ -66,7 +66,7 @@ export function BookingModal({ doctor, onClose, onBooked }: {
         ) : <Text style={styles.copy}>Este profissional não possui horários livres no momento.</Text>)
       )}
       <Feedback>{feedback}</Feedback>
-      {!!slots.length && <Action label={saving ? 'Agendando…' : 'Confirmar agendamento'}
+      {!!slots.length && <Action icon="calendar-outline" label={saving ? 'Agendando…' : 'Confirmar agendamento'}
         onPress={book} disabled={!selected || saving} />}
     </AppointmentModal>
   );

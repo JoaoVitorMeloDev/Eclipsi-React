@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { AvailabilityPanel } from '../../components/appointments/AvailabilityPanel';
 import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
@@ -115,7 +116,7 @@ function MedicoScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity onPress={() => setMenuOpen(true)} accessibilityLabel="Abrir menu">
-            <Ionicons name="menu" size={26} color={palette.white} />
+            <Ionicons aria-hidden name="menu" size={26} color={palette.white} />
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Image
@@ -165,11 +166,11 @@ function MedicoScreen() {
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardTitle}>{item.patient}</Text>
                     <Text style={styles.specialty}>{item.type}</Text>
-                    <Text style={styles.cardDate}>🗓 {item.date}</Text>
-                    <Text style={styles.cardPrice}>💰 {item.price}</Text>
+                    <Text style={styles.cardDate}><Ionicons aria-hidden name="calendar-outline" size={16} color={palette.indigo} /> {item.date}</Text>
+                    <Text style={styles.cardPrice}><Ionicons aria-hidden name="wallet-outline" size={16} color={palette.wine} /> {item.price}</Text>
                     <Text style={styles.cardPreview} numberOfLines={2}>{item.preview}</Text>
                     <View style={styles.viewBtn}>
-                      <Text style={styles.btnText}>Ver prontuário / Laudo</Text>
+                      <Text style={styles.btnText}><Ionicons aria-hidden name="document-text-outline" size={17} color={palette.cream} /> Ver prontuário / Laudo</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -222,13 +223,13 @@ function MedicoScreen() {
                 style={styles.settingsNavBtn} 
                 onPress={() => setActiveTab('configuracoes')}
               >
-                <Text style={styles.settingsNavBtnText}>⚙️ Configurações</Text>
+                <Text style={styles.settingsNavBtnText}><Ionicons aria-hidden name="settings-outline" size={16} color={palette.indigo} /> Configurações</Text>
               </TouchableOpacity>
             </View>
 
             {/* Resumo de Ganhos */}
             <View style={styles.earningsContainer}>
-              <Text style={styles.earningsTitle}>📈 Resumo de Ganhos</Text>
+              <Text style={styles.earningsTitle}><Ionicons aria-hidden name="stats-chart-outline" size={16} color={palette.indigo} /> Resumo de Ganhos</Text>
               <View style={styles.earningsGrid}>
                 <View style={styles.earningsCard}>
                   <Text style={styles.earningsLabel}>Ganhos Realizados</Text>
@@ -355,8 +356,8 @@ function MedicoScreen() {
                 <Text style={styles.menuItemText}>{item.label}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity style={styles.menuItem} onPress={logout}>
-              <Text style={styles.menuItemText}>Sair</Text>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Sair" style={styles.menuItem} onPress={logout}>
+              <Text style={styles.menuItemText}><Ionicons aria-hidden name="log-out-outline" size={17} color={palette.wine} /> Sair</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -425,7 +426,7 @@ function MedicoScreen() {
                   {prescriptionLoading ? (
                     <><ActivityIndicator size="small" color={palette.white} /><Text style={styles.btnText}>Salvando...</Text></>
                   ) : (
-                    <Text style={styles.btnText}>Salvar no Prontuário</Text>
+                    <Text style={styles.btnText}><Ionicons aria-hidden name="document-text-outline" size={17} color={palette.cream} /> Salvar no Prontuário</Text>
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -490,7 +491,7 @@ function MedicoScreen() {
                   <View key={index} style={styles.consultationHistoryCard}>
                     <View style={styles.consultationHistoryHeader}>
                       <Text style={styles.consultationHistoryType}>{c.type}</Text>
-                      <Text style={styles.consultationHistoryDate}>🗓 {c.date}</Text>
+                      <Text style={styles.consultationHistoryDate}><Ionicons aria-hidden name="calendar-outline" size={16} color={palette.indigo} /> {c.date}</Text>
                     </View>
                     <Text style={styles.consultationHistoryNotes}>{c.notes}</Text>
                   </View>
@@ -504,16 +505,18 @@ function MedicoScreen() {
       {/* Navegação Inferior (Bottom Navigation) Padrão Mobile */}
       <View style={styles.bottomNav}>
         <TouchableOpacity 
+          accessibilityRole="button" accessibilityLabel="Agenda"
           style={[styles.bottomNavItem, activeTab === 'home' && styles.bottomNavActive]} 
           onPress={() => setActiveTab('home')}
         >
-          <Text style={styles.bottomNavIcon}>📅</Text>
+          <Ionicons aria-hidden name="calendar-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity 
+          accessibilityRole="button" accessibilityLabel="Pacientes"
           style={[styles.bottomNavItem, activeTab === 'pacientes' && styles.bottomNavActive]} 
           onPress={() => setActiveTab('pacientes')}
         >
-          <Text style={styles.bottomNavIcon}>👥</Text>
+          <Ionicons aria-hidden name="people-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="button"
@@ -521,13 +524,14 @@ function MedicoScreen() {
           style={[styles.bottomNavItem, activeTab === 'disponibilidade' && styles.bottomNavActive]}
           onPress={() => setActiveTab('disponibilidade')}
         >
-          <Text style={styles.bottomNavIcon}>🕒</Text>
+          <Ionicons aria-hidden name="time-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity 
+          accessibilityRole="button" accessibilityLabel="Perfil profissional"
           style={[styles.bottomNavItem, activeTab === 'perfil' && styles.bottomNavActive]} 
           onPress={() => setActiveTab('perfil')}
         >
-          <Text style={styles.bottomNavIcon}>🩺</Text>
+          <Ionicons aria-hidden name="person-circle-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -535,7 +539,18 @@ function MedicoScreen() {
 }
 
 // Estilização adaptada para React Native (StyleSheet)
-export default withRouteGuard(MedicoScreen, 'medico');
+const GuardedScreen = withRouteGuard(MedicoScreen, 'medico');
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Painel Profissional</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -716,9 +731,6 @@ const styles = StyleSheet.create({
     opacity: 1,
     backgroundColor: palette.wine,
     borderRadius: 12,
-  },
-  bottomNavIcon: {
-    fontSize: 22,
   },
   modalBackdrop: {
     flex: 1,

@@ -55,13 +55,13 @@ export function AvailabilityPanel({ professionalId }: { professionalId: number |
       <Text accessibilityRole="header" style={styles.sectionTitle}>Minha Disponibilidade</Text>
       <Text style={styles.copy}>Os horários são exibidos no fuso deste dispositivo.</Text>
       <DateTimeFields date={date} time={time} onDate={setDate} onTime={setTime} />
-      <Action label="Adicionar horário" onPress={() => save()} disabled={busy || loading} />
+      <Action icon="add-circle-outline" label="Adicionar horário" onPress={() => save()} disabled={busy || loading} />
       <Feedback>{feedback}</Feedback>
       {loading ? <ActivityIndicator color={palette.indigo} accessibilityLabel="Carregando disponibilidade" /> : (
         !failed && (slots.length ? slots.map(slot => (
           <View key={slot.id} style={[styles.options, { alignItems: 'center', justifyContent: 'space-between' }]}>
             <Text style={styles.copy}>{appointmentTime(slot.data_hora)}</Text>
-            <Action label="Remover horário" onPress={() => save(slot.id)} disabled={busy} />
+            <Action icon="remove-circle-outline" label="Remover horário" onPress={() => save(slot.id)} disabled={busy} />
           </View>
         )) : <Text style={styles.copy}>Nenhum horário livre cadastrado.</Text>)
       )}

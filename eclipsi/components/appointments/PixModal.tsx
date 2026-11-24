@@ -95,11 +95,11 @@ export function PixModal({ appointmentId, onClose, onPaid }: {
           ) : null}
           <Text style={styles.label}>PIX Copia e Cola</Text>
           <Text selectable style={styles.code}>{payment.qr_code}</Text>
-          <Action label="Copiar Código PIX" onPress={copy} disabled={busy} />
+          <Action icon="copy-outline" label="Copiar Código PIX" onPress={copy} disabled={busy} />
           {payment.mode === 'sandbox_mock' ? (
-            <Action label="Confirmar Pagamento (Demonstração)" onPress={confirmDemo} disabled={busy} />
+            <Action icon="checkmark-circle-outline" label="Confirmar Pagamento (Demonstração)" onPress={confirmDemo} disabled={busy} />
           ) : (
-            <Action label="Verificar pagamento" onPress={refresh} disabled={busy} />
+            <Action icon="refresh-outline" label="Verificar pagamento" onPress={refresh} disabled={busy} />
           )}
         </>
       )}

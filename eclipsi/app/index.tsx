@@ -1,18 +1,20 @@
+import { Head } from 'expo-router/head';
 import { AcademicDemoNotice } from '../components/AcademicDemoNotice';
 import { withRouteGuard } from '../components/RouteGuard';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { useRouter } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { palette } from '../lib/palette';
 
 function WelcomeScreen() {
   const router = useRouter();
+  const { height } = useWindowDimensions();
   const handleLogin = () => router.push('/auth/login');
   const handleRegister = () => router.push('/auth/cadastro');
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { minHeight: height }]}>
       <View style={styles.brand}>
         <Image
           source={require('../assets/images/logo.png')}
@@ -45,7 +47,18 @@ function WelcomeScreen() {
   );
 }
 
-export default withRouteGuard(WelcomeScreen);
+const GuardedScreen = withRouteGuard(WelcomeScreen);
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Saúde Mental Digital</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   screen: {
@@ -54,12 +67,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
+    justifyContent: 'center',
   },
   brand: {
     flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 32,
+    minHeight: 224,
+    paddingTop: 56,
+    paddingBottom: 24,
   },
   logo: {
     width: 120,
@@ -73,7 +89,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 48,
     borderTopRightRadius: 48,
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 32,
   },
   actions: {
     width: '100%',

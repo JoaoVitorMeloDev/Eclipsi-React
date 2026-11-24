@@ -57,7 +57,7 @@ export function TriageModal({ onClose, onSaved }: { onClose: () => void; onSaved
       <FormInput accessibilityLabel="Valor máximo por sessão" value={budget}
         onChangeText={setBudget} keyboardType="decimal-pad" placeholder="Ex.: 160" />
       <Feedback>{feedback}</Feedback>
-      <Action label={saving ? 'Salvando…' : 'Salvar triagem'} onPress={save} disabled={saving} />
+      <Action icon="clipboard-outline" label={saving ? 'Salvando…' : 'Salvar triagem'} onPress={save} disabled={saving} />
     </AppointmentModal>
   );
 }

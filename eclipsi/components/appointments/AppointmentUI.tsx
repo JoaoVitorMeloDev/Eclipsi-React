@@ -1,15 +1,19 @@
-import type { ReactNode } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import type { ComponentProps, ReactNode } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { PrimaryButton } from '../PrimaryButton';
 import { palette } from '../../lib/palette';
 
-export function Action({ label, onPress, disabled }: {
-  label: string; onPress: () => void; disabled?: boolean;
+export function Action({ label, onPress, disabled, icon }: {
+  label: string; onPress: () => void; disabled?: boolean; icon?: ComponentProps<typeof Ionicons>['name'];
 }) {
   return (
-    <PrimaryButton onPress={onPress} disabled={disabled} style={[styles.button, disabled && styles.disabled]}>
-      <Text style={styles.buttonText}>{label}</Text>
+    <PrimaryButton accessibilityLabel={label} onPress={onPress} disabled={disabled} style={[styles.button, disabled && styles.disabled]}>
+      <Text style={styles.buttonText}>
+        {icon && <><Ionicons aria-hidden name={icon} size={18} color={palette.cream} />{' '}</>}
+        {label}
+      </Text>
     </PrimaryButton>
   );
 }

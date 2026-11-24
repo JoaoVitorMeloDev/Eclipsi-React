@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
@@ -311,7 +312,18 @@ function CadastroMedicoScreen() {
   );
 }
 
-export default withRouteGuard(CadastroMedicoScreen);
+const GuardedScreen = withRouteGuard(CadastroMedicoScreen);
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Cadastro Profissional</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   screenContainer: {

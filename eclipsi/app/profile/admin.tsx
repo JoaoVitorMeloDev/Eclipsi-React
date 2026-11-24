@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useState, useEffect } from 'react';
@@ -181,7 +182,7 @@ function AdminScreen() {
             onPress={() => setSidebarOpen(true)}
             activeOpacity={0.7}
           >
-            <Ionicons name="menu" size={26} color={palette.white} />
+            <Ionicons aria-hidden name="menu" size={26} color={palette.white} />
           </TouchableOpacity>
           <Image
             source={require("../../assets/images/logo.png")}
@@ -266,10 +267,11 @@ function AdminScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            accessibilityRole="button" accessibilityLabel="Sair"
             style={[styles.navItem, styles.logoutItem]}
             onPress={logout}
           >
-            <Text style={styles.logoutText}>Sair</Text>
+            <Text style={styles.logoutText}><Ionicons aria-hidden name="log-out-outline" size={17} color={palette.wine} /> Sair</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -475,22 +477,25 @@ function AdminScreen() {
       {/* Navegação Inferior (Mobile Footer Navbar) */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Usuários"
           style={[styles.bottomNavItem, activeTab === 'usuarios' && styles.bottomNavItemActive]}
           onPress={() => setActiveTab('usuarios')}
         >
-          <Text style={[styles.bottomNavIcon, activeTab === 'usuarios' && styles.bottomNavIconActive]}>👥</Text>
+          <Ionicons aria-hidden name="people-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Estatísticas"
           style={[styles.bottomNavItem, activeTab === 'estatisticas' && styles.bottomNavItemActive]}
           onPress={() => setActiveTab('estatisticas')}
         >
-          <Text style={[styles.bottomNavIcon, activeTab === 'estatisticas' && styles.bottomNavIconActive]}>📈</Text>
+          <Ionicons aria-hidden name="stats-chart-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Perfil administrativo"
           style={[styles.bottomNavItem, activeTab === 'perfil' && styles.bottomNavItemActive]}
           onPress={() => setActiveTab('perfil')}
         >
-          <Text style={[styles.bottomNavIcon, activeTab === 'perfil' && styles.bottomNavIconActive]}>⚙️</Text>
+          <Ionicons aria-hidden name="settings-outline" size={22} color={palette.cream} />
         </TouchableOpacity>
       </View>
 
@@ -567,7 +572,18 @@ function AdminScreen() {
   );
 }
 
-export default withRouteGuard(AdminScreen, 'admin');
+const GuardedScreen = withRouteGuard(AdminScreen, 'admin');
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Administração</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -965,12 +981,6 @@ const styles = StyleSheet.create({
     opacity: 1,
     backgroundColor: palette.wine,
     borderRadius: 12,
-  },
-  bottomNavIcon: {
-    fontSize: 22,
-  },
-  bottomNavIconActive: {
-    fontSize: 22,
   },
   modalBackdrop: {
     flex: 1,
