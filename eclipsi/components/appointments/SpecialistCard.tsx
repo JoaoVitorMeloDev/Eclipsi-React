@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { currency, type Specialist } from '../../lib/appointments';
+import { professionalRegistration } from '../../lib/professionalRegistration';
 import { palette } from '../../lib/palette';
 import { Action, styles } from './AppointmentUI';
 
@@ -9,6 +10,7 @@ const avatar = require('../../assets/images/avatar.png');
 
 export function SpecialistCard({ doctor, onBook }: { doctor: Specialist; onBook: () => void }) {
   const [failedPhoto, setFailedPhoto] = useState<string>();
+  const registration = professionalRegistration(doctor.registro, doctor.uf, doctor.especialidade);
 
   return (
     <View style={styles.card}>
@@ -22,6 +24,7 @@ export function SpecialistCard({ doctor, onBook }: { doctor: Specialist; onBook:
         <View style={local.identity}>
           <Text style={styles.label}>{doctor.nome}</Text>
           <Text style={styles.copy}>{doctor.especialidade || 'Profissional de saúde mental'}</Text>
+          {registration && <Text style={styles.label}>{registration}</Text>}
           <Text style={styles.copy}>
             {[doctor.abordagem, doctor.modalidade].filter(Boolean).join(' · ') || 'Abordagem e modalidade não informadas'}
           </Text>
@@ -38,7 +41,7 @@ export function SpecialistCard({ doctor, onBook }: { doctor: Specialist; onBook:
           </View>
         </>
       )}
-      <Action label="Ver horários" onPress={onBook} />
+      <Action icon="calendar-outline" label="Ver horários" onPress={onBook} />
     </View>
   );
 }

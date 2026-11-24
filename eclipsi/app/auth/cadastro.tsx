@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { palette } from '../../lib/palette';
@@ -71,7 +72,18 @@ function CadastroEscolhaScreen() {
   );
 }
 
-export default withRouteGuard(CadastroEscolhaScreen);
+const GuardedScreen = withRouteGuard(CadastroEscolhaScreen);
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Escolher tipo de cadastro</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   safeArea: {

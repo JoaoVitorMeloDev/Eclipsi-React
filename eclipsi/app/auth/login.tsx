@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { AcademicDemoNotice } from '../../components/AcademicDemoNotice';
 import { getVerifiedRole, profileRoutes } from '../../lib/auth';
 import { withRouteGuard } from '../../components/RouteGuard';
@@ -179,7 +180,18 @@ function LoginScreen() {
   );
 }
 
-export default withRouteGuard(LoginScreen);
+const GuardedScreen = withRouteGuard(LoginScreen);
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Entrar</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   mainContainer: {

@@ -1,3 +1,4 @@
+import { Head } from 'expo-router/head';
 import { withRouteGuard } from '../../components/RouteGuard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
@@ -268,7 +269,18 @@ function CadastroUserScreen() {
   );
 }
 
-export default withRouteGuard(CadastroUserScreen);
+const GuardedScreen = withRouteGuard(CadastroUserScreen);
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Cadastro de Paciente</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   containerMain: {

@@ -1,9 +1,11 @@
-import { Action, Feedback, styles as appointmentStyles } from '../../components/appointments/AppointmentUI';
+import { professionalRegistration } from '../../lib/professionalRegistration';
+import { Head } from 'expo-router/head';
+import { Action, AppointmentModal, Feedback, styles as appointmentStyles } from '../../components/appointments/AppointmentUI';
 import { BookingModal } from '../../components/appointments/BookingModal';
 import { PixModal } from '../../components/appointments/PixModal';
 import { SpecialistCard } from '../../components/appointments/SpecialistCard';
 import { TriageModal } from '../../components/appointments/TriageModal';
-import { errorMessage, listSpecialists, type Specialist } from '../../lib/appointments';
+import { appointmentTime, currency, errorMessage, listSpecialists, type Specialist } from '../../lib/appointments';
 import { withRouteGuard, useLogout } from '../../components/RouteGuard';
 import { palette } from '../../lib/palette';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -23,9 +25,45 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 const avatar = require('../../assets/images/avatar.png');
+
+type AppointmentRecord = {
+  id: number | string;
+  medico_id?: number | string;
+  medico_nome?: string;
+  especialidade?: string;
+  registro?: string;
+  uf?: string;
+  abordagem?: string;
+  modalidade?: string;
+  data_hora: string;
+  valor: number;
+  status: string;
+  anotacoes?: string;
+  pagamento_status?: string;
+  payment_status?: string;
+};
+
+function toAppointmentCard(item: AppointmentRecord) {
+  const paymentStatus = item.pagamento_status || item.payment_status;
+  return {
+    id: item.id, doctorId: item.medico_id, doctor: item.medico_nome,
+    specialty: item.especialidade, registration: item.registro, uf: item.uf,
+    approach: item.abordagem, modality: item.modalidade,
+    date: appointmentTime(item.data_hora), price: currency.format(item.valor),
+    img: avatar, status: item.status, paid: paymentStatus === 'pago',
+    paymentStatus, annotation: item.anotacoes,
+  };
+}
+
+type AppointmentCard = ReturnType<typeof toAppointmentCard>;
+
+const statusLabels: Record<string, string> = {
+  agendada: 'Agendada', concluida: 'Concluída', realizada: 'Realizada', cancelada: 'Cancelada',
+  pago: 'Pago', pendente: 'Pendente', cancelado: 'Cancelado', estornado: 'Estornado',
+};
 
 function UserScreen() {
   const logout = useLogout();
@@ -45,8 +83,7 @@ function UserScreen() {
   const [activeTab, setActiveTab] = useState<'home' | 'consultas' | 'perfil' | 'configuracoes'>('home');
 
   // Estados dos Modais
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentCard | null>(null);
 
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [ratingDoctorName, setRatingDoctorName] = useState('');
@@ -59,36 +96,15 @@ function UserScreen() {
   const [profileBio, setProfileBio] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
-  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
-  const [completedAppointments, setCompletedAppointments] = useState<any[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<AppointmentCard[]>([]);
+  const [completedAppointments, setCompletedAppointments] = useState<AppointmentCard[]>([]);
   const [doctorsList, setDoctorsList] = useState<Specialist[]>([]);
 
   const reloadAppointments = useCallback(async () => {
-    const result = await api<{ success: boolean; appointments: any[] }>('/api/v1/appointments');
-    setUpcomingAppointments(result.appointments
-      .filter((item) => item.status === 'agendada')
-      .map((item) => ({
-        id: item.id,
-        doctor: item.medico_nome,
-        specialty: item.especialidade,
-        date: new Date(item.data_hora).toLocaleString('pt-BR'),
-        price: `R$ ${Number(item.valor).toFixed(2)}`,
-        img: avatar,
-        status: item.status,
-        paid: item.pagamento_status === 'pago' || item.payment_status === 'pago',
-        annotation: item.anotacoes,
-      })));
-    setCompletedAppointments(result.appointments
-      .filter((item) => ['concluida', 'realizada'].includes(item.status))
-      .map((item) => ({
-        id: item.id,
-        doctor: item.medico_nome,
-        specialty: item.especialidade,
-        date: new Date(item.data_hora).toLocaleString('pt-BR'),
-        price: `R$ ${Number(item.valor).toFixed(2)}`,
-        img: avatar,
-        feedback: item.anotacoes,
-      })));
+    const result = await api<{ appointments: AppointmentRecord[] }>('/api/v1/appointments');
+    const appointments = result.appointments.map(toAppointmentCard);
+    setUpcomingAppointments(appointments.filter(item => item.status === 'agendada'));
+    setCompletedAppointments(appointments.filter(item => ['concluida', 'realizada'].includes(item.status)));
   }, []);
 
   async function reloadSpecialists() {
@@ -216,23 +232,18 @@ function UserScreen() {
             {/* Próximas Consultas */}
             <View style={styles.homeSection}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome5 name="calendar-check" size={16} color={palette.indigo} /> Próximas Consultas
+                <Ionicons aria-hidden name="calendar-outline" size={16} color={palette.indigo} /> Próximas Consultas
               </Text>
               {upcomingAppointments.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.appointmentCard}
-                  onPress={() => {
-                    setSelectedAppointment(item);
-                    setDetailsModalVisible(true);
-                  }}
-                >
+                <View key={item.id} style={styles.appointmentCard}>
                   <Image source={item.img} style={styles.cardImg} />
                   <View style={styles.cardInfo}>
-                    <Text style={styles.cardDoctorName}>{item.doctor}</Text>
-                    <Text style={styles.specialty}>{item.specialty}</Text>
-                    <Text style={styles.cardDate}>🗓 {item.date}</Text>
-                    <Text style={styles.cardPrice}>💰 {item.price}</Text>
+                    <TouchableOpacity onPress={() => setSelectedAppointment(item)}>
+                      <Text style={styles.cardDoctorName}>{item.doctor}</Text>
+                      <Text style={styles.specialty}>{item.specialty}</Text>
+                      <Text style={styles.cardDate}><Ionicons aria-hidden name="calendar-outline" size={16} color={palette.indigo} /> {item.date}</Text>
+                      <Text style={styles.cardPrice}><Ionicons aria-hidden name="wallet-outline" size={16} color={palette.wine} /> {item.price}</Text>
+                    </TouchableOpacity>
                     <View style={styles.upcomingBadge}>
                       <Text style={styles.upcomingBadgeText}>{item.status}</Text>
                     </View>
@@ -240,21 +251,23 @@ function UserScreen() {
                       <Text style={styles.cardPreview}>Prescrição: {item.annotation}</Text>
                     ) : null}
                     <View style={styles.cardActions}>
-                      <TouchableOpacity style={styles.viewBtn}>
-                        <Text style={styles.viewBtnText}>Ver detalhes</Text>
+                      <TouchableOpacity accessibilityRole="button" style={styles.viewBtn} accessibilityLabel="Ver detalhes"
+                        onPress={() => setSelectedAppointment(item)}>
+                        <Text style={styles.viewBtnText}><Ionicons aria-hidden name="document-text-outline" size={18} color={palette.cream} /> Ver detalhes</Text>
                       </TouchableOpacity>
                       {item.paid || paidAppointments.has(String(item.id)) ? (
                         <Text style={appointmentStyles.status}>Pago</Text>
                       ) : (
                         <TouchableOpacity
                           accessibilityRole="button"
+                          accessibilityLabel="Pagar via PIX"
                           style={appointmentStyles.button}
                           onPress={event => {
                             event.stopPropagation();
                             setPaymentAppointment(item.id);
                           }}
                         >
-                          <Text style={appointmentStyles.buttonText}>Pagar via PIX</Text>
+                          <Text style={appointmentStyles.buttonText}><Ionicons aria-hidden name="qr-code-outline" size={18} color={palette.cream} /> Pagar via PIX</Text>
                         </TouchableOpacity>
                       )}
                       <TouchableOpacity
@@ -277,7 +290,7 @@ function UserScreen() {
                       </TouchableOpacity>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </View>
               ))}
             </View>
 
@@ -286,44 +299,40 @@ function UserScreen() {
             {/* Consultas Realizadas */}
             <View style={styles.homeSection}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome5 name="clock" size={16} color={palette.indigo} /> Consultas Realizadas
+                <Ionicons aria-hidden name="time-outline" size={16} color={palette.indigo} /> Consultas Realizadas
               </Text>
               {completedAppointments.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.appointmentCard}
-                  onPress={() => {
-                    setSelectedAppointment(item);
-                    setDetailsModalVisible(true);
-                  }}
-                >
+                <View key={item.id} style={styles.appointmentCard}>
                   <Image source={item.img} style={styles.cardImg} />
                   <View style={styles.cardInfo}>
-                    <Text style={styles.cardDoctorName}>{item.doctor}</Text>
-                    <Text style={styles.specialty}>{item.specialty}</Text>
-                    <Text style={styles.cardDate}>🗓 {item.date}</Text>
-                    <Text style={styles.cardPrice}>💰 {item.price}</Text>
-                    {item.feedback ? (
-                      <Text style={styles.cardPreview} numberOfLines={3}>Prescrição: {item.feedback}</Text>
+                    <TouchableOpacity onPress={() => setSelectedAppointment(item)}>
+                      <Text style={styles.cardDoctorName}>{item.doctor}</Text>
+                      <Text style={styles.specialty}>{item.specialty}</Text>
+                      <Text style={styles.cardDate}><Ionicons aria-hidden name="calendar-outline" size={16} color={palette.indigo} /> {item.date}</Text>
+                      <Text style={styles.cardPrice}><Ionicons aria-hidden name="wallet-outline" size={16} color={palette.wine} /> {item.price}</Text>
+                    </TouchableOpacity>
+                    {item.annotation ? (
+                      <Text style={styles.cardPreview} numberOfLines={3}>Prescrição: {item.annotation}</Text>
                     ) : null}
                     <View style={styles.cardActions}>
-                      <TouchableOpacity style={styles.viewBtn}>
-                        <Text style={styles.viewBtnText}>Ver detalhes</Text>
+                      <TouchableOpacity accessibilityRole="button" style={styles.viewBtn} accessibilityLabel="Ver detalhes"
+                        onPress={() => setSelectedAppointment(item)}>
+                        <Text style={styles.viewBtnText}><Ionicons aria-hidden name="document-text-outline" size={18} color={palette.cream} /> Ver detalhes</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.rateBtn}
                         onPress={(e) => {
                           e.stopPropagation();
-                          setRatingDoctorName(item.doctor);
+                          setRatingDoctorName(item.doctor || 'Profissional');
                           setRatingAppointmentId(Number(item.id));
                           setRatingModalVisible(true);
                         }}
                       >
-                        <Text style={styles.rateBtnText}>⭐ Avaliar</Text>
+                        <Text style={styles.rateBtnText}><Ionicons aria-hidden name="star-outline" size={16} color={palette.cream} /> Avaliar</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-                </TouchableOpacity>
+                </View>
               ))}
             </View>
           </View>
@@ -334,7 +343,7 @@ function UserScreen() {
             <Text style={styles.pageTitle}>Buscar Consultas</Text>
             <Text style={styles.pageSubtitle}>Encontre o profissional ideal para o seu acompanhamento:</Text>
             <View style={appointmentStyles.card}>
-              <Action label="Triagem de Compatibilidade" onPress={() => setTriageOpen(true)} />
+              <Action icon="clipboard-outline" label="Triagem de Compatibilidade" onPress={() => setTriageOpen(true)} />
             </View>
             {catalogLoading && <ActivityIndicator color={palette.indigo} accessibilityLabel="Carregando especialistas" />}
             <Feedback>{catalogFeedback}</Feedback>
@@ -359,7 +368,7 @@ function UserScreen() {
                 style={styles.settingsNavBtn}
                 onPress={() => setActiveTab('configuracoes')}
               >
-                <FontAwesome5 name="cog" size={14} color={palette.indigo} />
+                <Ionicons aria-hidden name="settings-outline" size={14} color={palette.indigo} />
                 <Text style={styles.settingsNavBtnText}>Configurações</Text>
               </TouchableOpacity>
             </View>
@@ -425,7 +434,7 @@ function UserScreen() {
           <View>
             <View style={styles.settingsHeaderContainer}>
               <TouchableOpacity style={styles.btnBack} onPress={() => setActiveTab('perfil')}>
-                <FontAwesome5 name="arrow-left" size={16} color={palette.indigo} />
+                <Ionicons aria-hidden name="arrow-back-outline" size={16} color={palette.indigo} />
                 <Text style={styles.btnBackText}>Voltar</Text>
               </TouchableOpacity>
               <Text style={styles.pageTitle}>Configurações</Text>
@@ -506,9 +515,10 @@ function UserScreen() {
             ))}
             <TouchableOpacity
               style={[styles.drawerItem, styles.drawerLogout]}
+              accessibilityRole="button" accessibilityLabel="Sair"
               onPress={logout}
             >
-              <Text style={styles.drawerItemText}>Sair</Text>
+              <Text style={styles.drawerItemText}><Ionicons aria-hidden name="log-out-outline" size={17} color={palette.wine} /> Sair</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -517,59 +527,36 @@ function UserScreen() {
       {/* Navegação Inferior (Bottom Navigation) */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Início"
           style={[styles.navItem, activeTab === 'home' && styles.navItemActive]}
           onPress={() => setActiveTab('home')}
         >
-          <FontAwesome5 name="house-user" size={20} color={palette.white} />
+          <Ionicons aria-hidden name="home-outline" size={20} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Buscar consultas"
           style={[styles.navItem, activeTab === 'consultas' && styles.navItemActive]}
           onPress={() => setActiveTab('consultas')}
         >
-          <FontAwesome5 name="search" size={20} color={palette.white} />
+          <Ionicons aria-hidden name="search-outline" size={20} color={palette.cream} />
         </TouchableOpacity>
         <TouchableOpacity
+          accessibilityRole="button" accessibilityLabel="Perfil"
           style={[styles.navItem, activeTab === 'perfil' && styles.navItemActive]}
           onPress={() => setActiveTab('perfil')}
         >
-          <FontAwesome5 name="user" size={20} color={palette.white} />
+          <Ionicons aria-hidden name="person-circle-outline" size={20} color={palette.cream} />
         </TouchableOpacity>
       </View>
 
-      {/* Modal de Detalhes da Consulta */}
-      <Modal visible={detailsModalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.modalClose}
-              onPress={() => setDetailsModalVisible(false)}
-            >
-              <Text style={styles.modalCloseText}>&times;</Text>
-            </TouchableOpacity>
-            {selectedAppointment && (
-              <View>
-                <View style={styles.modalHeader}>
-                  <Image source={{ uri: selectedAppointment.img }} style={styles.modalImg} />
-                  <View>
-                    <Text style={styles.cardDoctorName}>{selectedAppointment.doctor}</Text>
-                    <Text style={styles.specialty}>{selectedAppointment.specialty}</Text>
-                  </View>
-                </View>
-                <View style={styles.modalBody}>
-                  <Text style={styles.label}>Data: <Text style={styles.normalText}>{selectedAppointment.date}</Text></Text>
-                  <Text style={styles.label}>Valor: <Text style={styles.normalText}>{selectedAppointment.price}</Text></Text>
-                  {(selectedAppointment.feedback || selectedAppointment.annotation) && (
-                    <View style={styles.feedbackBox}>
-                      <Text style={styles.label}>Anotações do profissional:</Text>
-                      <Text style={styles.feedbackText}>{selectedAppointment.feedback || selectedAppointment.annotation}</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            )}
-          </View>
-        </View>
-      </Modal>
+      {selectedAppointment && (
+        <ConsultationDetails
+          appointment={selectedAppointment}
+          specialist={doctorsList.find(doctor => String(doctor.id) === String(selectedAppointment.doctorId))}
+          paid={selectedAppointment.paid || paidAppointments.has(String(selectedAppointment.id))}
+          onClose={() => setSelectedAppointment(null)}
+        />
+      )}
 
       {/* Modal de Avaliação */}
       <Modal visible={ratingModalVisible} animationType="fade" transparent={true}>
@@ -582,8 +569,9 @@ function UserScreen() {
             <Text style={styles.specialty}>{ratingDoctorName}</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 12 }}>
               {[1, 2, 3, 4, 5].map((value) => (
-                <TouchableOpacity key={value} onPress={() => setRatingValue(value)}>
-                  <Text style={{ fontSize: 24 }}>{value <= ratingValue ? '⭐' : '☆'}</Text>
+                <TouchableOpacity key={value} accessibilityRole="button" accessibilityLabel={`Nota ${value} de 5`}
+                  accessibilityState={{ selected: ratingValue === value }} onPress={() => setRatingValue(value)}>
+                  <Ionicons aria-hidden name={value <= ratingValue ? 'star' : 'star-outline'} size={24} color={palette.wine} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -630,7 +618,50 @@ function UserScreen() {
 }
 
 // Estilização adaptada para StyleSheet do React Native
-export default withRouteGuard(UserScreen, 'paciente');
+function ConsultationDetails({ appointment, specialist, paid, onClose }: {
+  appointment: AppointmentCard; specialist?: Specialist; paid: boolean; onClose: () => void;
+}) {
+  const specialty = appointment.specialty || specialist?.especialidade;
+  const registration = professionalRegistration(
+    appointment.registration || specialist?.registro, appointment.uf || specialist?.uf, specialty,
+  );
+  const fields = [
+    ['Profissional', appointment.doctor || specialist?.nome],
+    ['Especialidade', specialty],
+    ['Registro profissional', registration],
+    ['Abordagem', appointment.approach || specialist?.abordagem],
+    ['Modalidade', appointment.modality || specialist?.modalidade],
+    ['Data e hora', appointment.date],
+    ['Valor', appointment.price],
+    ['Status da consulta', statusLabels[appointment.status] || appointment.status],
+    ['Status do pagamento', paid ? 'Pago' : statusLabels[appointment.paymentStatus ?? ''] || appointment.paymentStatus],
+    ...(appointment.annotation ? [['Anotações do profissional', appointment.annotation]] : []),
+  ];
+
+  return (
+    <AppointmentModal title="Detalhes da consulta" onClose={onClose}>
+      {fields.map(([label, value]) => (
+        <View key={label}>
+          <Text style={appointmentStyles.label}>{label}</Text>
+          <Text style={appointmentStyles.copy}>{value || 'Não informado'}</Text>
+        </View>
+      ))}
+    </AppointmentModal>
+  );
+}
+
+const GuardedScreen = withRouteGuard(UserScreen, 'paciente');
+
+export default function Route() {
+  return (
+    <>
+      <Head>
+        <title>EcliPsi — Painel do Paciente</title>
+      </Head>
+      <GuardedScreen />
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -868,37 +899,6 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 24,
     color: palette.muted,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  modalImg: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  modalBody: {
-    gap: 8,
-  },
-  feedbackBox: {
-    backgroundColor: palette.neutral,
-    padding: 10,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: palette.indigo,
-    marginTop: 8,
-  },
-  feedbackText: {
-    fontSize: 13,
-    color: palette.indigo,
-    lineHeight: 18,
-  },
-  normalText: {
-    fontWeight: 'normal',
-    color: palette.indigo,
   },
   profileHeaderContainer: {
     flexDirection: 'row',
