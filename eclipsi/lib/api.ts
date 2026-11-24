@@ -1,4 +1,26 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+const memStore = new Map<string, string>();
+const SafeStorage = {
+  async getItem(key: string): Promise<string | null> {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage.getItem(key);
+    }
+    return memStore.has(key) ? memStore.get(key)! : null;
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(key, value);
+      return;
+    }
+    memStore.set(key, value);
+  },
+  async removeItem(key: string): Promise<void> {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.removeItem(key);
+      return;
+    }
+    memStore.delete(key);
+  },
+};
 
 const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
 export const API_URL = (
@@ -29,12 +51,12 @@ export function subscribeAuthSession(listener: () => void): () => void {
 
 export async function getAuthToken(): Promise<string | null> {
   await sessionWrite;
-  return signedOut ? null : AsyncStorage.getItem(AUTH_TOKEN_KEY);
+  return signedOut ? null : SafeStorage.getItem(AUTH_TOKEN_KEY);
 }
 
 export function setAuthToken(token: string): Promise<void> {
   const write = sessionWrite.then(async () => {
-    await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+    await SafeStorage.setItem(AUTH_TOKEN_KEY, token);
     signedOut = false;
     notifySessionChange();
   });
@@ -51,7 +73,7 @@ export function clearAuthSession({ logout = false } = {}): Promise<void> {
   signedOut = true;
   const write = sessionWrite.then(async () => {
     signedOut = true;
-    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+    await SafeStorage.removeItem(AUTH_TOKEN_KEY);
   });
   sessionWrite = write.catch(() => undefined);
   setProfileAvatar(null);
@@ -60,6 +82,10 @@ export function clearAuthSession({ logout = false } = {}): Promise<void> {
 }
 
 export function observeBrowserSession() {
+  if (typeof window === "undefined" || typeof window.addEventListener !== "function") return () => {};
+  if (typeof window === "undefined" || typeof window.addEventListener !== "function") return () => {};
+  if (typeof window === "undefined" || typeof window.addEventListener !== "function") return () => {};
+  if (typeof window === "undefined" || typeof window.addEventListener !== "function") return () => {};
   const onStorage = (event: StorageEvent) => {
     if (event.storageArea !== window.localStorage) return;
     if (event.key !== AUTH_TOKEN_KEY && event.key !== null) return;
@@ -131,21 +157,27 @@ export async function api<T = unknown>(
     throw new ApiError("O caminho da API deve comecar com '/'.", 0);
   }
 
-  const headers = new Headers(init?.headers);
-  headers.set("Accept", "application/json");
+  const rawHeaders: Record<string, string> = { Accept: "application/json" };
+  if (init?.headers) {
+    Object.entries(init.headers as Record<string, string>).forEach(([k, v]) => {
+      if (v !== undefined) rawHeaders[k] = String(v);
+    });
+  }
   const version = getSessionVersion();
-  const usesStoredSession = !headers.has("Authorization") && !path.startsWith("/api/v1/auth/");
+  const hasAuth = Object.keys(rawHeaders).some((k) => k.toLowerCase() === "authorization");
+  const usesStoredSession = !hasAuth && !path.startsWith("/api/v1/auth/");
   const token = usesStoredSession ? await getAuthToken() : null;
   if (version !== getSessionVersion() && usesStoredSession) {
     throw new ApiError("Sua sessao mudou. Tente novamente.", 0);
   }
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (init?.body && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json");
+  if (token) rawHeaders["Authorization"] = `Bearer ${token}`;
+  if (init?.body && !Object.keys(rawHeaders).some((k) => k.toLowerCase() === "content-type")) {
+    rawHeaders["Content-Type"] = "application/json";
   }
+  const headers = rawHeaders;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
     const response = await fetch(`${API_URL}${path}`, {
       ...init,

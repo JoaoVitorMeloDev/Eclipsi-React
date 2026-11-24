@@ -75,7 +75,7 @@ function LoginScreen() {
         setFeedback(data.message || "E-mail ou senha incorretos.");
       }
     } catch (error) {
-      setFeedback(error instanceof ApiError ? error.message : "Ocorreu um erro ao conectar ao servidor.");
+      setFeedback(error instanceof Error ? error.message : "Ocorreu um erro ao conectar ao servidor.");
     } finally {
       setLoading(false);
     }
