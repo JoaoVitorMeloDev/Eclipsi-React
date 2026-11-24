@@ -1,137 +1,112 @@
-# EcliPsi — Plataforma PWA de Saúde Mental
+# EcliPsi — Plataforma Digital de Saúde Mental
 
-Aplicação web progressiva (**PWA**) desenvolvida para conectar pacientes e profissionais de saúde mental (psicólogos e psiquiatras), oferecendo busca de especialistas, agendamento de consultas, emissão de prontuário/prescrições e gestão administrativa com controle de acesso baseado em papéis (**RBAC**).
+**Projeto Integrador III · Análise e Desenvolvimento de Sistemas · Faculdade Senac Pernambuco**
 
-- **Aplicação em Produção:** [https://eclipsi.dev](https://eclipsi.dev)
-- **Repositório Frontend:** `JoaoVitorMeloDev/Eclipsi-React`
-- **Repositório Backend (API):** `eclipsi-pi-BackEnd`
+O EcliPsi é uma aplicação multiplataforma em **React Native com Expo**, desenvolvida a partir do PWA original para conectar pacientes a profissionais de saúde mental. No mobile e na Web PWA, o paciente pode comparar preços, consultar o registro profissional (CRP/CRM e UF quando cadastrados), fazer uma triagem orientativa com compatibilidade de 0 a 100%, reservar um horário real e abrir o checkout PIX. A exibição do registro permite consultá-lo no conselho profissional correspondente. A triagem orienta a busca e não substitui avaliação clínica.
 
----
+| Recurso | Link oficial |
+| --- | --- |
+| Aplicação em produção | [eclipsi.dev](https://eclipsi.dev) |
+| API em produção | [API EcliPsi no Render](https://eclipsi-pi-backend-ptcv.onrender.com) |
+| Repositório frontend | [JoaoVitorMeloDev/Eclipsi-React](https://github.com/JoaoVitorMeloDev/Eclipsi-React) |
+| Repositório backend | [JoaoVitorMeloDev/eclipsi-pi-BackEnd](https://github.com/JoaoVitorMeloDev/eclipsi-pi-BackEnd) |
 
-## Arquitetura da Solução
+## Equipe
 
-```text
-┌──────────────────────┐       HTTPS / TLS       ┌───────────────────────────────┐
-│   Cliente (PWA/Web)  │ ──────────────────────► │  Cloudflare DNS + Vercel CDN  │
-│  React Native / Expo │                         │     ([https://eclipsi.dev](https://eclipsi.dev))     │
-└──────────────────────┘                         └───────────────┬───────────────┘
-                                                                 │ REST JSON + JWT
-                                                                 ▼
-┌──────────────────────┐       SQL / RLS         ┌───────────────────────────────┐
-│   Supabase Postgres  │ ◄────────────────────── │     API REST Flask (Render)   │
-│  (Auth, DB, Policies)│                         │   RBAC, Validação & Regras    │
-└──────────────────────┘                         └───────────────────────────────┘
-```
+- Erik Melado Carvalho
+- Gabriel Felipe Belo de Moura
+- João Vitor Lima Braga Graciliano de Melo
+- Júlia Maria Silva Parra Torres
+- Luís Filipe Harten Nogueira
+- Maria Sophia Lima dos Santos
+- Valentina Matias
 
-### Stack Tecnológica
-- **Frontend & PWA:** React Native, Expo Router, TypeScript, Service Worker (`sw.js` v2) e Web App Manifest (`manifest.json`).
-- **Backend (API):** Python, Flask, PyJWT, Bcrypt/Werkzeug Security, Flask-CORS.
-- **Banco de Dados & Persistência:** PostgreSQL gerenciado no Supabase com **Row Level Security (RLS)**.
-- **Infraestrutura & Deploy:** Vercel (Frontend/PWA), Render (API), Cloudflare & Name.com (DNS/SSL).
+## Recursos React Native e Expo
 
----
+| Recurso | Aplicação |
+| --- | --- |
+| Stack Navigator e menu lateral | O Expo Router organiza Home, Login, escolha de cadastro e formulários de paciente e profissional (`/`, `/auth/login`, `/auth/cadastro`, `/auth/cadastro-user`, `/auth/cadastro-medico`). Os menus laterais dos painéis dão acesso às seções do perfil e ao logout. O `RouteGuard.tsx` valida sessão e perfil antes de renderizar `/profile/user`, `/profile/medico` e `/profile/admin`. |
+| `Modal` | Triagem, escolha de horários livres, detalhes da consulta com CRP/CRM e UF, e checkout PIX com QR Code e código copiável. |
+| `ScrollView` e `FlatList` | O catálogo ordenado por compatibilidade, a agenda e o histórico usam `ScrollView` com itens renderizados por mapeamento. A revisão da versão documentada não identificou uso de `FlatList` nessas telas. |
+| `TextInput` | Campos de login e cadastro, orçamento da triagem e filtros de busca. Pode ser usado diretamente ou pelo componente `FormInput`. |
+| `TouchableOpacity` e `Pressable` | `TouchableOpacity` atende, por exemplo, cancelamento, logout e seleção de opções de horário. Botões de confirmar reserva, copiar PIX e adicionar ou remover horários usam `Pressable` pelo componente `PrimaryButton`. |
+| `useState` | Mantém estado de formulários, modais, carregamento, seleção de horários, estado de liberação da guarda e confirmação do pagamento na sessão. A identidade e o perfil vêm da API. |
+| `Ionicons`, `fade` e `slide` | Ícones vetoriais de `@expo/vector-icons` e transições dos modais. A identidade é centralizada em `eclipsi/lib/palette.ts`. |
 
-## Identidade Visual Oficial
+| Cor | Hex |
+| --- | --- |
+| Índigo principal | `#2E2382` |
+| Magenta vibrante | `#FF0066` |
+| Vinho | `#B8005C` |
+| Salmão | `#FFA089` |
+| Creme | `#FFF0C2` |
 
-Padronizada centralmente em `eclipsi/lib/palette.ts` e aplicada em todas as telas, manifest e barra de status do navegador:
+## Arquitetura de produção
 
-| Token | Hex | Aplicação |
-| :--- | :--- | :--- |
-| **Índigo Principal** | `#2E2382` | Cabeçalhos, painéis escuros, bordas de foco e `theme_color` |
-| **Magenta Vibrante** | `#FF0066` | Botões de ação primária (CTA) e destaques |
-| **Vinho / Magenta Escuro** | `#B8005C` | Estado `hover`/`pressed`, bordas inferiores de botões e links |
-| **Salmão Suave** | `#FFA089` | Alertas, badges secundários e feedbacks de atenção |
-| **Creme Oficial** | `#FFF0C2` | Superfície superior das telas de entrada e `background_color` |
+| Camada | Implementação |
+| --- | --- |
+| Frontend e PWA | React Native, Expo Router e TypeScript. A exportação Web está hospedada na **Vercel**, com domínio registrado na **Name.com** e DNS, SSL e proteção de borda pela **Cloudflare**. O deploy usa HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, manifest Web e Service Worker v3. O worker preserva a navegação online e exclui requisições da API do cache. |
+| Backend | API REST em Python e Flask no **Render**. O JWT identifica a sessão e o RBAC distingue `paciente`, `medico` e `admin`. CORS permite as origens oficiais e `http://localhost:8081`. A reserva concorrente é protegida no banco e a API retorna `409 Conflict` quando um slot fica ocupado ou indisponível. |
+| Dados | **Supabase / PostgreSQL**, com `public.users` para perfis e `public.consultas` para agendamentos. A migração versionada acrescenta `public.disponibilidades`, `public.triagens` e suporte a PIX em `public.pagamentos`, com RLS nessas três tabelas e o índice parcial `ux_consultas_active_time`. A política efetiva de RLS em `users` e `consultas` e a presença de `ck_users_especialidade` precisam ser confirmadas no schema do Supabase de produção. |
+| Checkout PIX | Com `MERCADO_PAGO_ACCESS_TOKEN` no Render, a API usa `/v1/payments` para receber QR Code e código EMV Copia e Cola. O webhook `/api/v1/payments/webhook/mercadopago` consulta o provedor e valida referência, moeda, método e valor antes de marcar como pago. O modo `sandbox_mock` usa código de demonstração sem cobrança bancária. Credenciais ficam no backend. |
 
----
+## Fluxos e API
 
-## Segurança e Controle de Acesso (Ponta a Ponta)
+| Fluxo | Endpoints principais |
+| --- | --- |
+| Autenticação | `POST /api/v1/auth/register/user`, `POST /api/v1/auth/register/doctor`, `POST /api/v1/auth/login`, `GET /api/me` |
+| Triagem e catálogo | `POST /api/v1/patient/triage`, `GET /api/v1/patient/doctors/recommended`, `GET /api/v1/patient/doctors` |
+| Agenda e consultas | `GET /api/v1/professionals/{id}/availability`, `POST /api/v1/professional/availability`, `DELETE /api/v1/professional/availability/{slot_id}`, `POST /api/v1/patient/appointments`, `GET /api/v1/appointments` |
+| Pagamentos | `POST /api/v1/payments/pix/create`, `POST /api/v1/payments/pix/{payment_id}/confirm` (demonstração), `POST /api/v1/payments/webhook/mercadopago` |
 
-1. **Autenticação Stateless via JWT:** Sessões validadas por token `Bearer` emitido no login (`/api/v1/auth/login`) e verificado em tempo real contra `/api/me`.
-2. **Proteção de Rotas e RBAC no Frontend (`RouteGuard.tsx`):**
-   - Bloqueio preventivo de renderização nas rotas `/profile/user`, `/profile/medico` e `/profile/admin` até a confirmação do papel (`role`) pelo servidor.
-   - Redirecionamento automático em tentativas de acesso não autenticado (`401`) ou escalonamento horizontal/vertical de privilégios (`403`).
-   - Sincronização de encerramento de sessão entre múltiplas abas do navegador (`storage` listener) e limpeza completa de estado no logout (`router.replace('/')`).
-3. **Isolamento de Dados no Banco (Supabase RLS):** Políticas de segurança em nível de linha garantindo que pacientes, profissionais e administradores acessem apenas os registros autorizados ao seu perfil.
-4. **Higiene de Credenciais:** Nenhuma chave privada (`SERVICE_ROLE`, segredos JWT ou tokens de gateway) é armazenada no cliente; arquivos `.env` são ignorados pelo Git (`.gitignore`), mantendo apenas `.env.example`.
+O logout limpa a sessão local e volta para `/`. Uma resposta `401` em requisição autenticada invalida a sessão. Ao tentar reservar um horário que acabou de ser ocupado, a interface atualiza a grade após o `409`.
 
----
+## Execução local
 
-## Principais Funcionalidades (Histórias de Usuário)
+Use uma versão do Node.js compatível com o Expo SDK 58 e npm.
 
-- **HU01 — Cadastro e Autenticação Multi-Perfil:** Registro dedicado para **Paciente** e **Profissional** (com conselho CRP/CRM e UF) e login unificado com redirecionamento automático por perfil.
-- **HU02 — Catálogo e Busca de Especialistas:** Listagem de profissionais verificados com filtro por nome/especialidade, valor da sessão e apresentação profissional.
-- **HU03 — Agendamento e Acompanhamento de Consultas:** Solicitação de atendimento pelo paciente e gestão de agenda pelo profissional.
-- **HU04 — Prontuário e Prescrições:** Registro de observações e prescrições vinculadas à consulta pelo profissional, com visualização pelo paciente.
-- **HU05 — Painel Administrativo:** Visão consolidada de usuários ativos, perfis cadastrados e indicadores operacionais da plataforma.
-
----
-
-## Mapa de Integração com a API
-
-| Método | Endpoint | Perfil | Descrição |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/register/user` | Público | Cadastro de paciente |
-| `POST` | `/api/v1/auth/register/doctor` | Público | Cadastro de profissional |
-| `POST` | `/api/v1/auth/login` | Público | Autenticação e emissão de token JWT |
-| `GET` | `/api/me` | Autenticado | Validação de sessão ativa e papel (`role`) |
-| `POST` | `/api/v1/patient/triage` | Paciente | Salva motivo, abordagem, modalidade, orçamento e urgência |
-| `GET` | `/api/v1/patient/doctors/recommended` | Paciente | Lista especialistas com score e motivos da recomendação |
-| `GET` | `/api/v1/patient/doctors` | Paciente | Fallback do catálogo recomendado |
-| `GET` | `/api/v1/professionals/{id}/availability` | Autenticado | Lista horários futuros livres do profissional |
-| `POST` | `/api/v1/professional/availability` | Profissional | Cria horário com `data_hora` ISO 8601 com fuso |
-| `DELETE` | `/api/v1/professional/availability/{slot_id}` | Profissional | Remove horário livre próprio da grade |
-| `POST` | `/api/v1/patient/appointments` | Paciente | Agenda por `slot_id`. Em caso de `409`, recarrega a grade |
-| `GET` | `/api/v1/appointments` | Autenticado | Consultas vinculadas à conta |
-| `GET` | `/api/v1/doctor/appointments` | Profissional | Agenda e histórico de atendimentos |
-| `PATCH` | `/api/v1/appointments/{id}` | Autenticado | Atualiza a consulta conforme o papel do usuário |
-| `POST` | `/api/v1/payments/pix/create` | Paciente | Cria ou recupera a cobrança por `consulta_id` |
-| `POST` | `/api/v1/payments/pix/{payment_id}/confirm` | Paciente | Confirma exclusivamente no modo demonstração |
-| `POST` | `/api/v1/payments/webhook/mercadopago` | Provedor → API | Confirma o PIX após verificação no Mercado Pago |
-| `GET` | `/api/v1/admin/stats` | Admin | Indicadores administrativos |
-
-A triagem envia `motivo_principal`, `abordagem_preferida`, `modalidade`, `faixa_valor_max` e `urgencia`. O catálogo mantém a ordem decrescente de compatibilidade e exibe os motivos retornados pela API. O catálogo legado `/api/v1/doctors` continua disponível como último fallback durante a transição do backend.
-
-Após a publicação do [PR do backend](https://github.com/JoaoVitorMeloDev/eclipsi-pi-BackEnd/pull/1) e a aplicação da migração no Supabase, a agenda passa a consultar apenas os slots livres enviados pela API. O servidor define o modo PIX. No modo demonstração, o frontend gera o QR Code e oferece confirmação manual. No Mercado Pago, ele exibe o PNG recebido e verifica novamente a cobrança existente quando o usuário solicita. A confirmação vem da API. O painel mantém o badge após a confirmação durante a sessão. Quando a listagem de consultas não inclui o status PIX, é possível recuperar a mesma cobrança ao abrir o pagamento novamente. Credenciais do Mercado Pago ficam no backend.
-
----
-
-## Execução Local
-
-### Pré-requisitos
-- Node.js 18+ e npm
-- API backend em execução local ou URL de produção configurada
-
-### Passo a passo
 ```bash
-# 1. Acesse o diretório do app Expo
-cd eclipsi
-
-# 2. Instale as dependências
+git clone https://github.com/JoaoVitorMeloDev/Eclipsi-React.git
+cd Eclipsi-React/eclipsi
 npm install
-
-# 3. Configure as variáveis de ambiente
 cp .env.example .env
-# Edite EXPO_PUBLIC_API_URL apontando para a API (ex.: http://localhost:5000)
-
-# 4. Inicie o servidor de desenvolvimento Web/Expo
-npx expo start --web
 ```
 
-### Build de Produção (Web / PWA)
+No `.env`:
+
+```dotenv
+EXPO_PUBLIC_API_URL=https://eclipsi-pi-backend-ptcv.onrender.com
+```
+
 ```bash
+npx expo start
+```
+
+Para abrir diretamente na Web, use `npx expo start --web`. A origem local autorizada pela API é `http://localhost:8081`.
+
+### Verificação e build Web
+
+```bash
+npx tsc --noEmit
+npm run lint
 npx expo export --platform web
 ```
 
----
+O Expo grava a exportação em `eclipsi/dist/`.
 
-## Evoluções Planejadas (Roadmap)
-- **Notificações Push Web:** Lembretes automáticos de consultas agendadas via Web Push API.
+## Capturas de Tela
 
----
+Evidências de produção obtidas via Playwright e Chromium em 23/11/2026 (horário de Recife). As capturas registram o conteúdo da página. O título da aba e a resposta HTTP do favicon foram verificados à parte no navegador. A captura mobile de 390 × 844 preserva a escala observada no deploy, cujo HTML não declarou a meta tag de viewport.
 
-## Equipe de Desenvolvimento
-- **João Vitor Melo** — Arquitetura, Segurança, Deploy & Integração Full-Stack
-- **Gabriel Felipe Belo de Moura** — Frontend React Native / Expo
-- **Júlia Maria Silva Parra Torres** — Documentação, Requisitos & QA
-- **Maria Sophia Lima dos Santos** — Design, UI/UX & Identidade Visual
+Na sessão de teste, Lívia Andrade (Demo) ficou em primeiro com 100% e a API retornou 13 horários livres. O checkout de R$ 110,00 retornou `201` em modo `mercadopago`, com QR e código EMV. A captura e o trecho correspondente do vídeo ocultam as partes pagáveis. A cobrança ficou sem pagamento. O horário criado pela conta profissional fictícia foi removido após o teste.
+
+| Fluxo | Evidência |
+| --- | --- |
+| Home, desktop e mobile | [1366 × 768](docs/screenshots/01-home-desktop.png) · [390 × 844](docs/screenshots/02-home-mobile.png) |
+| Entrada e cadastro | [Login](docs/screenshots/03-login-e-cadastro.png) · [Opções de cadastro](docs/screenshots/03b-opcoes-cadastro.png) |
+| Triagem e catálogo | [Formulário preenchido](docs/screenshots/04-triagem-compatibilidade.png) · [Ranking e motivos](docs/screenshots/05-catalogo-ranqueado.png) |
+| Agendamento e consulta | [Horários reais](docs/screenshots/06-agenda-slots-reais.png) · [Detalhes e registro profissional](docs/screenshots/07-detalhes-consulta-crp.png) |
+| Pagamento | [Checkout Mercado Pago de R$ 110,00 com dados pagáveis ocultos](docs/screenshots/08-pagamento-pix-qrcode.png) |
+| Profissional | [Minha Disponibilidade](docs/screenshots/09-painel-profissional-disponibilidade.png) |
+
+[Vídeo WebM da demonstração, com a captura do PIX inserida após os detalhes da consulta](docs/demo-eclipsi.webm) · [README pronto para o backend](docs/README-BACKEND.md)
