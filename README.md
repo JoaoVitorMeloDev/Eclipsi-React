@@ -96,7 +96,9 @@ O Expo grava a exportação em `eclipsi/dist/`.
 
 ## Capturas de Tela
 
-Evidências de produção obtidas via Playwright e Chromium em 23/11/2026 (horário de Recife). As capturas registram o conteúdo da página. O título da aba e a resposta HTTP do favicon foram verificados à parte no navegador. A captura mobile de 390 × 844 preserva a escala observada no deploy, cujo HTML não declarou a meta tag de viewport.
+Evidências de produção obtidas via Playwright e Chromium em 23/11/2026 (horário de Recife). As capturas registram o conteúdo da página. O título da aba e a resposta HTTP do favicon foram verificados à parte no navegador. A exportação Web deste PR contém a meta tag de viewport. Na recaptura mobile de 390 × 844, o HTML publicado ainda não a servia. O Playwright aplicou apenas essa meta tag à sessão de captura, sobre a página de produção, para mostrar o enquadramento previsto. A captura do login usa a página de produção sem intervenção.
+
+A revisão da migração confirmou as declarações de RLS para `disponibilidades`, `triagens` e `pagamentos` no código. As políticas efetivas e a constraint `ck_users_especialidade` não puderam ser verificadas no Supabase de produção sem acesso ao catálogo do banco.
 
 Na sessão de teste, Lívia Andrade (Demo) ficou em primeiro com 100% e a API retornou 13 horários livres. O checkout de R$ 110,00 retornou `201` em modo `mercadopago`, com QR e código EMV. A captura e o trecho correspondente do vídeo ocultam as partes pagáveis. A cobrança ficou sem pagamento. O horário criado pela conta profissional fictícia foi removido após o teste.
 
